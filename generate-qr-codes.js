@@ -9,8 +9,8 @@ const tables = [
     'Picknic 1', 'Picknic 2', 'Picknic 3'
 ];
 
-// Base URL for the website - GitHub Pages URL
-const baseUrl = 'https://maxm19991.github.io/station134-menu';
+// Base URL for the website - Netlify URL
+const baseUrl = 'https://68a78e63b6598965dcaab232--graceful-lebkuchen-da9a1f.netlify.app';
 
 // Create qr-codes directory if it doesn't exist
 const qrCodesDir = path.join(__dirname, 'qr-codes');
