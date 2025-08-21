@@ -820,6 +820,10 @@
             orderButton.disabled = true;
             
             try {
+                console.log('Starting payment process with data:', orderData);
+                console.log('Using functions URL:', NETLIFY_FUNCTIONS_URL);
+                console.log('Test mode:', USE_TEST_MODE);
+                
                 // Create real Mollie payment
                 await createMolliePayment(orderData);
             } catch (error) {
@@ -834,6 +838,9 @@
         
         async function createMolliePayment(orderData) {
             try {
+                console.log('Calling Mollie payment function...');
+                console.log('Full URL:', `${NETLIFY_FUNCTIONS_URL}/create-payment`);
+                
                 // Call Netlify function to create payment
                 const response = await fetch(`${NETLIFY_FUNCTIONS_URL}/create-payment`, {
                     method: 'POST',
