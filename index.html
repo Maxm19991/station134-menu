@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Station 134 - Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .cart-icon {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: #007cba;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            border: none;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cart-icon:hover {
+            background: #005a87;
+        }
+        .cart-counter {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        p {
+            color: #666;
+            text-align: center;
+        }
+        .items-list {
+            margin-top: 30px;
+        }
+        .items-list h2 {
+            color: #333;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 10px;
+        }
+        .item {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .item-info {
+            flex: 1;
+        }
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 0 0 5px 0;
+        }
+        .item-description {
+            font-size: 14px;
+            color: #28a745;
+            margin: 5px 0;
+        }
+        .item-price {
+            font-size: 16px;
+            font-weight: bold;
+            color: #007cba;
+            margin: 10px 0;
+        }
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .btn {
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.2s ease;
+        }
+        .order-btn {
+            background: #28a745;
+            padding: 10px 20px;
+        }
+        .order-btn:hover {
+            background: #218838;
+        }
+        .cart-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .cart-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-item-info {
+            flex: 1;
+        }
+        .cart-item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .cart-item-price {
+            color: #007cba;
+            font-size: 14px;
+        }
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .quantity-btn {
+            background: #007cba;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .quantity-btn:hover {
+            background: #005a87;
+        }
+        .quantity {
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+        }
+        .cart-total {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #007cba;
+        }
+        .close-cart {
+            background: #dc3545;
+            padding: 10px 20px;
+            margin-top: 20px;
+        }
+        .close-cart:hover {
+            background: #c82333;
+        }
+        .order-cart-btn {
+            background: #28a745;
+            padding: 15px 30px;
+            font-size: 16px;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .order-cart-btn:hover {
+            background: #218838;
+        }
+        .bottom-order-btn {
+            background: #dc3545;
+            padding: 15px 30px;
+            font-size: 18px;
+            width: 100%;
+            margin: 30px 0 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .bottom-order-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        .empty-cart {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+        .category-section {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .category-header {
+            background: #007cba;
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+        .category-header:hover {
+            background: #005a87;
+        }
+        .category-arrow {
+            transition: transform 0.3s ease;
+            font-size: 20px;
+        }
+        .category-arrow.expanded {
+            transform: rotate(180deg);
+        }
+        .category-items {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f9f9f9;
+        }
+        .category-items.expanded {
+            max-height: 5000px;
+        }
+        .category-items .item {
+            margin: 0;
+            border-radius: 0;
+            border: none;
+            border-bottom: 1px solid #eee;
+        }
+        .category-items .item:last-child {
+            border-bottom: none;
+        }
+        .subcategory-section {
+            margin: 0;
+            border: none;
+            border-radius: 0;
+            overflow: hidden;
+        }
+        .subcategory-header {
+            background: #28a745;
+            color: white;
+            padding: 12px 40px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            width: 100%;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        .subcategory-header:hover {
+            background: #218838;
+        }
+        .subcategory-arrow {
+            transition: transform 0.3s ease;
+            font-size: 16px;
+        }
+        .subcategory-arrow.expanded {
+            transform: rotate(180deg);
+        }
+        .subcategory-items {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            background: #f0f8f0;
+        }
+        .subcategory-items.expanded {
+            max-height: 3000px;
+        }
+        .subcategory-items .item {
+            margin: 0;
+            border-radius: 0;
+            border: none;
+            border-bottom: 1px solid #ddd;
+            background: white;
+        }
+        .subcategory-items .item:last-child {
+            border-bottom: none;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+        .options-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+        .options-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .options-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .option-group {
+            margin-bottom: 20px;
+        }
+        .option-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .option-choice {
+            display: block;
+            margin: 8px 0;
+        }
+        .option-choice input {
+            margin-right: 8px;
+        }
+        .options-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .options-buttons button {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="cart-icon" onclick="toggleCart()">
+            🛒
+            <span class="cart-counter" id="cart-counter">0</span>
+        </button>
+        <h1>Station 134</h1>
+        <p id="welcome-text">Scan de QR-code, kies uw items en bestel direct!</p>
+        <div id="table-info" style="display: none; background: #007cba; color: white; padding: 15px; border-radius: 10px; text-align: center; margin: 20px 0; font-weight: bold; font-size: 18px;">
+            <span id="table-number"></span>
+        </div>
+        
+        <div class="items-list">
+            <h2>Onze menukaart</h2>
+            <div id="items-container">
+                <div class="loading">Loading items from Google Sheets...</div>
+            </div>
+            <button class="btn bottom-order-btn" onclick="toggleCart()">Bestel nu</button>
+        </div>
+    </div>
+    
+    <!-- Cart Modal -->
+    <div id="cart-modal" class="cart-modal" onclick="closeCartIfClickedOutside(event)">
+        <div class="cart-content" onclick="event.stopPropagation()">
+            <h2>Shopping Cart</h2>
+            <div id="cart-items"></div>
+            <div id="cart-total" class="cart-total"></div>
+            <button class="btn order-cart-btn" id="order-cart-btn" onclick="placeOrder()">Bestel nu</button>
+            <button class="btn close-cart" onclick="clearCart()" style="background: #ffc107; color: #000;">Clear Cart</button>
+            <button class="btn close-cart" onclick="toggleCart()">Close</button>
+        </div>
+    </div>
+
+    <!-- Options Modal -->
+    <div id="options-modal" class="options-modal" onclick="closeOptionsIfClickedOutside(event)">
+        <div class="options-content" onclick="event.stopPropagation()">
+            <div class="options-title" id="options-title">Choose Options</div>
+            <div id="options-form"></div>
+            <div class="options-buttons">
+                <button class="btn order-btn" onclick="confirmOptionsAndAddToCart()">Add to Cart</button>
+                <button class="btn close-cart" onclick="closeOptionsModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1YBdjcZAZH0hlCZ5oU9Xvs0aJtVJOakXeVP0Am6R7rE4/export?format=csv&gid=0';
+        
+        // Shopping cart functionality
+        let cart = [];
+        
+        // Load cart from localStorage and handle old format
+        try {
+            const savedCart = JSON.parse(localStorage.getItem('station134-cart')) || [];
+            console.log('Loaded cart from localStorage:', savedCart);
+            
+            // Check if cart items have the new structure
+            cart = savedCart.filter(item => {
+                // Ensure item has required properties for new format
+                if (!item.key) {
+                    // Convert old format to new format
+                    item.key = item.name;
+                    item.displayName = item.name;
+                    item.options = '';
+                }
+                return true;
+            });
+            
+            console.log('Processed cart:', cart);
+        } catch (error) {
+            console.log('Error loading cart, starting fresh:', error);
+            cart = [];
+        }
+        
+        // Options modal state
+        let currentItemForOptions = null;
+        
+        function saveCart() {
+            localStorage.setItem('station134-cart', JSON.stringify(cart));
+            updateCartCounter();
+        }
+        
+        function updateCartCounter() {
+            const counter = document.getElementById('cart-counter');
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            counter.textContent = totalItems;
+            counter.style.display = totalItems > 0 ? 'flex' : 'none';
+        }
+        
+        function clearCart() {
+            cart = [];
+            localStorage.removeItem('station134-cart');
+            updateCartCounter();
+            updateCartDisplay();
+            console.log('Cart cleared');
+        }
+        
+        function addToCart(name, price, options = '', optionPrices = '') {
+            // Check if item has options and show options modal
+            if (options && !currentItemForOptions) {
+                currentItemForOptions = { name, price, options, optionPrices };
+                showOptionsModal(name, options, optionPrices);
+                return;
+            }
+            
+            // Create unique identifier for items with options
+            const itemKey = options ? `${name} (${options})` : name;
+            const existingItem = cart.find(item => item.key === itemKey);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    key: itemKey,
+                    name: name,
+                    price: price,
+                    quantity: 1,
+                    options: options,
+                    displayName: options ? `${name} (${options})` : name
+                });
+            }
+            saveCart();
+        }
+        
+        function showOptionsModal(itemName, optionsString, optionPricesString = '') {
+            const modal = document.getElementById('options-modal');
+            const title = document.getElementById('options-title');
+            const form = document.getElementById('options-form');
+            
+            title.textContent = `Choose options for ${itemName}`;
+            
+            // Debug logging
+            console.log('Options:', optionsString);
+            console.log('Option Prices:', optionPricesString);
+            
+            // Parse options: "Sauce:Ketchup,Mayo,Curry;Size:Small,Medium,Large"
+            const optionGroups = optionsString.split(';');
+            // Parse option prices: "0.50,0.75,0.50;1.00,2.00,3.00" (matching option groups)
+            const priceGroups = optionPricesString ? optionPricesString.split(';') : [];
+            let formHTML = '';
+            
+            optionGroups.forEach((group, groupIndex) => {
+                const [optionName, choices] = group.split(':');
+                if (optionName && choices) {
+                    const choiceList = choices.split(',');
+                    const priceList = priceGroups[groupIndex] ? priceGroups[groupIndex].split(',') : [];
+                    
+                    console.log(`Group ${groupIndex}:`, choiceList, 'Prices:', priceList);
+                    
+                    formHTML += `
+                        <div class="option-group">
+                            <div class="option-label">${optionName.trim()}:</div>
+                    `;
+                    
+                    choiceList.forEach((choice, choiceIndex) => {
+                        const inputId = `option-${groupIndex}-${choiceIndex}`;
+                        const priceString = priceList[choiceIndex] ? priceList[choiceIndex].trim() : '0';
+                        const price = parseFloat(priceString) || 0;
+                        const priceDisplay = price > 0 ? ` (+€${price.toFixed(2).replace('.', ',')})` : '';
+                        
+                        console.log(`Choice: ${choice.trim()}, Price string: "${priceString}", Parsed price: ${price}`);
+                        
+                        formHTML += `
+                            <label class="option-choice">
+                                <input type="radio" name="option-${groupIndex}" value="${choice.trim()}" data-price="${price}" id="${inputId}" ${choiceIndex === 0 ? 'checked' : ''}>
+                                ${choice.trim()}${priceDisplay}
+                            </label>
+                        `;
+                    });
+                    
+                    formHTML += '</div>';
+                }
+            });
+            
+            form.innerHTML = formHTML;
+            modal.style.display = 'flex';
+        }
+        
+        function closeOptionsModal() {
+            document.getElementById('options-modal').style.display = 'none';
+            currentItemForOptions = null;
+        }
+        
+        function closeOptionsIfClickedOutside(event) {
+            if (event.target.id === 'options-modal') {
+                closeOptionsModal();
+            }
+        }
+        
+        function confirmOptionsAndAddToCart() {
+            if (!currentItemForOptions) return;
+            
+            // Collect selected options and their prices
+            const form = document.getElementById('options-form');
+            const selectedOptions = [];
+            const selectedPrices = [];
+            const radioGroups = form.querySelectorAll('input[type="radio"]:checked');
+            
+            radioGroups.forEach(radio => {
+                selectedOptions.push(radio.value);
+                selectedPrices.push(parseFloat(radio.getAttribute('data-price')) || 0);
+            });
+            
+            const optionsText = selectedOptions.join(', ');
+            const totalOptionPrice = selectedPrices.reduce((sum, price) => sum + price, 0);
+            
+            // Get item details and clear modal state first
+            const { name, price } = currentItemForOptions;
+            closeOptionsModal(); // This clears currentItemForOptions
+            
+            // Calculate total price (base price + option prices)
+            const basePrice = parseFloat(price.replace('€', '').replace(',', '.'));
+            const finalPrice = basePrice + totalOptionPrice;
+            const finalPriceFormatted = `€${finalPrice.toFixed(2).replace('.', ',')}`;
+            
+            // Add directly to cart without triggering options modal again
+            const itemKey = `${name} (${optionsText})`;
+            const existingItem = cart.find(item => item.key === itemKey);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    key: itemKey,
+                    name: name,
+                    price: finalPriceFormatted,
+                    basePrice: price,
+                    optionPrice: totalOptionPrice,
+                    quantity: 1,
+                    options: optionsText,
+                    displayName: `${name} (${optionsText})`
+                });
+            }
+            saveCart();
+        }
+        
+        function removeFromCart(itemKey) {
+            cart = cart.filter(item => item.key !== itemKey);
+            saveCart();
+            updateCartDisplay();
+        }
+        
+        function updateQuantity(itemKey, change) {
+            const item = cart.find(item => item.key === itemKey);
+            if (item) {
+                item.quantity += change;
+                if (item.quantity <= 0) {
+                    removeFromCart(itemKey);
+                } else {
+                    saveCart();
+                    updateCartDisplay();
+                }
+            }
+        }
+        
+        function toggleCart() {
+            const modal = document.getElementById('cart-modal');
+            const isVisible = modal.style.display === 'flex';
+            modal.style.display = isVisible ? 'none' : 'flex';
+            if (!isVisible) {
+                updateCartDisplay();
+            }
+        }
+        
+        function closeCartIfClickedOutside(event) {
+            if (event.target.id === 'cart-modal') {
+                toggleCart();
+            }
+        }
+        
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            const orderButton = document.getElementById('order-cart-btn');
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="empty-cart">Your cart is empty</div>';
+                cartTotal.innerHTML = '';
+                orderButton.style.display = 'none';
+                return;
+            }
+            
+            orderButton.style.display = 'block';
+            
+            let total = 0;
+            cartItems.innerHTML = cart.map(item => {
+                const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.'));
+                const itemTotal = itemPrice * item.quantity;
+                total += itemTotal;
+                
+                const optionPriceText = item.optionPrice > 0 ? ` (+€${item.optionPrice.toFixed(2).replace('.', ',')})` : '';
+                
+                return `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            ${item.options ? `<div class="cart-item-options" style="font-size: 12px; color: #666; margin-top: 2px;">Options: ${item.options}${optionPriceText}</div>` : ''}
+                            <div class="cart-item-price">${item.price} each</div>
+                        </div>
+                        <div class="cart-item-controls">
+                            <button class="btn quantity-btn" onclick="updateQuantity('${item.key.replace(/'/g, "\\'")}', -1)">-</button>
+                            <span class="quantity">${item.quantity}</span>
+                            <button class="btn quantity-btn" onclick="updateQuantity('${item.key.replace(/'/g, "\\'")}', 1)">+</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            cartTotal.innerHTML = `Total: €${total.toFixed(2).replace('.', ',')}`;
+        }
+        
+        function placeOrder() {
+            if (cart.length === 0) return;
+            
+            const total = cart.reduce((sum, item) => {
+                const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.'));
+                return sum + (itemPrice * item.quantity);
+            }, 0);
+            
+            const orderSummary = cart.map(item => {
+                const itemLine = `${item.quantity}x ${item.name} - ${item.price}`;
+                return item.options ? `${itemLine}\n   Options: ${item.options}` : itemLine;
+            }).join('\n');
+            
+            const tableInfo = currentTable ? `Tafel: ${currentTable}\n\n` : '';
+            
+            alert(`Bestelling geplaatst!\n\n${tableInfo}${orderSummary}\n\nTotaal: €${total.toFixed(2).replace('.', ',')}\n\nBedankt voor uw bestelling!`);
+            
+            // Clear cart after order
+            cart = [];
+            saveCart();
+            updateCartDisplay();
+        }
+        
+        function toggleCategory(categoryName) {
+            const categoryItems = document.getElementById(`category-${categoryName}`);
+            const arrow = document.getElementById(`arrow-${categoryName}`);
+            const isCurrentlyExpanded = categoryItems.classList.contains('expanded');
+            
+            // Close all other categories first
+            const allCategoryItems = document.querySelectorAll('.category-items');
+            const allArrows = document.querySelectorAll('.category-arrow');
+            
+            allCategoryItems.forEach(item => item.classList.remove('expanded'));
+            allArrows.forEach(arrow => arrow.classList.remove('expanded'));
+            
+            // Also close all subcategories
+            const allSubcategoryItems = document.querySelectorAll('.subcategory-items');
+            const allSubcategoryArrows = document.querySelectorAll('.subcategory-arrow');
+            
+            allSubcategoryItems.forEach(item => item.classList.remove('expanded'));
+            allSubcategoryArrows.forEach(arrow => arrow.classList.remove('expanded'));
+            
+            // If the clicked category wasn't expanded, open it
+            if (!isCurrentlyExpanded) {
+                categoryItems.classList.add('expanded');
+                arrow.classList.add('expanded');
+            }
+        }
+        
+        function toggleSubcategory(categoryName, subcategoryName) {
+            const subcategoryItems = document.getElementById(`subcategory-${categoryName}-${subcategoryName}`);
+            const arrow = document.getElementById(`subarrow-${categoryName}-${subcategoryName}`);
+            const isCurrentlyExpanded = subcategoryItems.classList.contains('expanded');
+            
+            // Close all other subcategories within this category
+            const allSubcategoryItems = document.querySelectorAll(`[id^="subcategory-${categoryName}-"]:not([id="subcategory-${categoryName}-${subcategoryName}"])`);
+            const allSubcategoryArrows = document.querySelectorAll(`[id^="subarrow-${categoryName}-"]:not([id="subarrow-${categoryName}-${subcategoryName}"])`);
+            
+            allSubcategoryItems.forEach(item => item.classList.remove('expanded'));
+            allSubcategoryArrows.forEach(arrow => arrow.classList.remove('expanded'));
+            
+            // Toggle the clicked subcategory
+            if (!isCurrentlyExpanded) {
+                subcategoryItems.classList.add('expanded');
+                arrow.classList.add('expanded');
+            } else {
+                subcategoryItems.classList.remove('expanded');
+                arrow.classList.remove('expanded');
+            }
+        }
+        
+        async function loadItemsFromSheet() {
+            try {
+                const response = await fetch(SHEET_CSV_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const csvText = await response.text();
+                
+                // Parse CSV data with proper handling of quoted fields
+                const rows = csvText.trim().split('\n');
+                const parseCSVRow = (row) => {
+                    const result = [];
+                    let current = '';
+                    let inQuotes = false;
+                    
+                    for (let i = 0; i < row.length; i++) {
+                        const char = row[i];
+                        if (char === '"') {
+                            inQuotes = !inQuotes;
+                        } else if (char === ',' && !inQuotes) {
+                            result.push(current.trim());
+                            current = '';
+                        } else {
+                            current += char;
+                        }
+                    }
+                    result.push(current.trim());
+                    return result;
+                };
+                
+                const headers = parseCSVRow(rows[0]);
+                const items = rows.slice(1).map(row => {
+                    const values = parseCSVRow(row);
+                    const item = {};
+                    headers.forEach((header, index) => {
+                        item[header.trim()] = values[index] ? values[index].trim() : '';
+                    });
+                    return item;
+                });
+                
+                
+                displayItems(items);
+            } catch (error) {
+                console.error('Error loading items:', error);
+                document.getElementById('items-container').innerHTML = 
+                    '<div class="item" style="color: red;">Error loading items. Please check your Google Sheets URL.</div>';
+            }
+        }
+        
+        function displayItems(items) {
+            const container = document.getElementById('items-container');
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="item">No items found.</div>';
+                return;
+            }
+            
+            // Group items by category and subcategory
+            const categories = {};
+            items.forEach(item => {
+                const category = item['Category'] || 'Other';
+                const subcategory = item['Subcategory'] || item['Sub Category'] || item['Sub-Category'] || 
+                                   item['subcategory'] || item['sub category'] || item['sub-category'] || '';
+                
+                if (!categories[category]) {
+                    categories[category] = {};
+                }
+                
+                if (subcategory) {
+                    if (!categories[category][subcategory]) {
+                        categories[category][subcategory] = [];
+                    }
+                    categories[category][subcategory].push(item);
+                } else {
+                    // Items without subcategory go directly under category
+                    if (!categories[category]['_direct']) {
+                        categories[category]['_direct'] = [];
+                    }
+                    categories[category]['_direct'].push(item);
+                }
+            });
+            
+            // Create HTML for each category
+            const categoriesHTML = Object.keys(categories).map(categoryName => {
+                const categoryData = categories[categoryName];
+                const categoryId = categoryName.replace(/\s+/g, '-').toLowerCase();
+                
+                // Create content for this category
+                let categoryContentHTML = '';
+                
+                // Add direct items (items without subcategory)
+                if (categoryData['_direct']) {
+                    const directItemsHTML = categoryData['_direct'].map(item => {
+                        const name = item['Item Name'] || 'Unnamed Item';
+                        const price = item['Price'] || 'Price not available';
+                        const description = item['Description'] || '';
+                        const options = item['Option'] || item['Options'] || '';
+                        const optionPrices = item['Option Price'] || item['option price'] || '';
+                        
+                        return `
+                            <div class="item">
+                                <div class="item-info">
+                                    <div class="item-name">${name}</div>
+                                    ${description ? `<div class="item-description">${description}</div>` : ''}
+                                </div>
+                                <div class="item-actions">
+                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}')">Order Now</button>
+                                    <div class="item-price">${price}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    categoryContentHTML += directItemsHTML;
+                }
+                
+                // Add subcategories
+                Object.keys(categoryData).forEach(subcategoryName => {
+                    if (subcategoryName === '_direct') return; // Skip direct items, already handled
+                    
+                    const subcategoryItems = categoryData[subcategoryName];
+                    const subcategoryId = subcategoryName.replace(/\s+/g, '-').toLowerCase();
+                    
+                    const subcategoryItemsHTML = subcategoryItems.map(item => {
+                        const name = item['Item Name'] || 'Unnamed Item';
+                        const price = item['Price'] || 'Price not available';
+                        const description = item['Description'] || '';
+                        const options = item['Option'] || item['Options'] || '';
+                        const optionPrices = item['Option Price'] || item['option price'] || '';
+                        
+                        return `
+                            <div class="item">
+                                <div class="item-info">
+                                    <div class="item-name">${name}</div>
+                                    ${description ? `<div class="item-description">${description}</div>` : ''}
+                                </div>
+                                <div class="item-actions">
+                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}')">Order Now</button>
+                                    <div class="item-price">${price}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    categoryContentHTML += `
+                        <div class="subcategory-section">
+                            <button class="subcategory-header" onclick="toggleSubcategory('${categoryId}', '${subcategoryId.replace(/'/g, "\\'")}')">
+                                <span>${subcategoryName}</span>
+                                <span class="subcategory-arrow" id="subarrow-${categoryId}-${subcategoryId}">▼</span>
+                            </button>
+                            <div class="subcategory-items" id="subcategory-${categoryId}-${subcategoryId}">
+                                ${subcategoryItemsHTML}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                return `
+                    <div class="category-section">
+                        <button class="category-header" onclick="toggleCategory('${categoryId}')">
+                            <span>${categoryName}</span>
+                            <span class="category-arrow" id="arrow-${categoryId}">▼</span>
+                        </button>
+                        <div class="category-items" id="category-${categoryId}">
+                            ${categoryContentHTML}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = categoriesHTML;
+        }
+        
+        // Table functionality
+        let currentTable = null;
+        
+        function getTableFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('table');
+        }
+        
+        function displayTableInfo() {
+            const table = getTableFromUrl();
+            const welcomeText = document.getElementById('welcome-text');
+            const tableInfo = document.getElementById('table-info');
+            const tableNumber = document.getElementById('table-number');
+            
+            if (table) {
+                currentTable = table;
+                welcomeText.style.display = 'none';
+                tableInfo.style.display = 'block';
+                tableNumber.textContent = `Tafel ${table}`;
+            } else {
+                welcomeText.style.display = 'block';
+                tableInfo.style.display = 'none';
+            }
+        }
+        
+        // Load items when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            displayTableInfo();
+            loadItemsFromSheet();
+            updateCartCounter();
+        });
+    </script>
+</body>
+</html>
