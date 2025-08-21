@@ -1,5 +1,18 @@
 {
+  "name": "station134-menu",
+  "version": "1.0.0",
+  "description": "Station 134 Restaurant Menu with QR Code Ordering System and Mollie Payments",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build step required for static site'"
+  },
   "dependencies": {
-    "qrcode": "^1.5.4"
-  }
+    "@mollie/api-client": "^3.7.0"
+  },
+  "devDependencies": {
+    "qrcode": "^1.5.3"
+  },
+  "keywords": ["restaurant", "menu", "qr-code", "mollie", "payments"],
+  "author": "Station 134",
+  "license": "MIT"
 }

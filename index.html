@@ -263,6 +263,13 @@
         .order-cart-btn:hover {
             background: #218838;
         }
+        .order-cart-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .order-cart-btn:disabled:hover {
+            background: #6c757d;
+        }
         .bottom-order-btn {
             background: #dc3545;
             padding: 15px 30px;
@@ -486,6 +493,12 @@
         
         // Shopping cart functionality
         let cart = [];
+        
+        // Mollie payment configuration
+        const NETLIFY_FUNCTIONS_URL = window.location.hostname.includes('netlify.app') 
+            ? '/.netlify/functions' 
+            : 'https://68a78e63b6598965dcaab232--graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions';
+        const USE_TEST_MODE = true; // Set to false for live payments
         
         // Load cart from localStorage and handle old format
         try {
@@ -785,7 +798,7 @@
             cartTotal.innerHTML = `Total: €${total.toFixed(2).replace('.', ',')}`;
         }
         
-        function placeOrder() {
+        async function placeOrder() {
             if (cart.length === 0) return;
             
             const total = cart.reduce((sum, item) => {
@@ -793,19 +806,92 @@
                 return sum + (itemPrice * item.quantity);
             }, 0);
             
-            const orderSummary = cart.map(item => {
-                const itemLine = `${item.quantity}x ${item.name} - ${item.price}`;
-                return item.options ? `${itemLine}\n   Options: ${item.options}` : itemLine;
-            }).join('\n');
+            const orderData = {
+                table: currentTable || 'Geen tafel',
+                items: cart,
+                total: total,
+                currency: 'EUR'
+            };
             
-            const tableInfo = currentTable ? `Tafel: ${currentTable}\n\n` : '';
+            // Show loading state
+            const orderButton = document.getElementById('order-cart-btn');
+            const originalText = orderButton.textContent;
+            orderButton.textContent = 'Bezig met betaling...';
+            orderButton.disabled = true;
             
-            alert(`Bestelling geplaatst!\n\n${tableInfo}${orderSummary}\n\nTotaal: €${total.toFixed(2).replace('.', ',')}\n\nBedankt voor uw bestelling!`);
-            
-            // Clear cart after order
-            cart = [];
-            saveCart();
-            updateCartDisplay();
+            try {
+                // Create real Mollie payment
+                await createMolliePayment(orderData);
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert('Er is een probleem opgetreden met de betaling. Probeer het opnieuw.');
+            } finally {
+                // Reset button
+                orderButton.textContent = originalText;
+                orderButton.disabled = false;
+            }
+        }
+        
+        async function createMolliePayment(orderData) {
+            try {
+                // Call Netlify function to create payment
+                const response = await fetch(`${NETLIFY_FUNCTIONS_URL}/create-payment`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        table: orderData.table,
+                        items: orderData.items,
+                        total: orderData.total,
+                        currency: orderData.currency,
+                        testMode: USE_TEST_MODE
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to create payment');
+                }
+
+                const paymentData = await response.json();
+                
+                if (paymentData.success) {
+                    // Store order data for success page
+                    localStorage.setItem('pending-order', JSON.stringify(orderData));
+                    
+                    // Redirect to Mollie payment page
+                    window.location.href = paymentData.paymentUrl;
+                } else {
+                    throw new Error('Payment creation failed');
+                }
+            } catch (error) {
+                console.error('Mollie payment error:', error);
+                throw error;
+            }
+        }
+        
+        // Handle payment success on page load
+        function handlePaymentReturn() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('payment') === 'success') {
+                const pendingOrder = localStorage.getItem('pending-order');
+                if (pendingOrder) {
+                    const orderData = JSON.parse(pendingOrder);
+                    
+                    // Show success message
+                    alert(`Betaling succesvol!\n\nBedankt voor uw bestelling!\n\nTafel: ${orderData.table}\nTotaal: €${orderData.total.toFixed(2).replace('.', ',')}`);
+                    
+                    // Clear cart and pending order
+                    cart = [];
+                    saveCart();
+                    updateCartDisplay();
+                    localStorage.removeItem('pending-order');
+                    
+                    // Clean URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
         }
         
         function toggleCategory(categoryName) {
@@ -1110,6 +1196,7 @@
             displayTableInfo();
             loadItemsFromSheet();
             updateCartCounter();
+            handlePaymentReturn();
         });
     </script>
 </body>
