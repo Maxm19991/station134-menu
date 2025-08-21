@@ -9,8 +9,8 @@ const tables = [
     'Picknic 1', 'Picknic 2', 'Picknic 3'
 ];
 
-// Base URL for the website - change this to your actual domain
-const baseUrl = 'http://localhost:8000'; // Change to your actual website URL
+// Base URL for the website - GitHub Pages URL
+const baseUrl = 'https://maxm19991.github.io/station134-menu';
 
 // Create qr-codes directory if it doesn't exist
 const qrCodesDir = path.join(__dirname, 'qr-codes');
