@@ -55,6 +55,16 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .cart-counter.bounce {
+            animation: cartBounce 0.5s ease;
+        }
+        @keyframes cartBounce {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3); background: #28a745; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
         h1 {
             color: #333;
@@ -82,8 +92,36 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: all 0.3s ease;
+        }
+        .item.added-flash {
+            background: linear-gradient(90deg, #e8f5e8, #ffffff);
+            border-color: #28a745;
+            animation: itemFlash 1s ease;
+        }
+        @keyframes itemFlash {
+            0% { background: #e8f5e8; }
+            100% { background: white; }
         }
         .item-info {
+            flex: 1;
+        }
+        .item-image {
+            width: 100px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 20px;
+            border: 2px solid #ddd;
+            flex-shrink: 0;
+            background-color: #f8f9fa;
+        }
+        .item-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        .item-text {
             flex: 1;
         }
         .item-name {
@@ -124,6 +162,18 @@
         }
         .order-btn:hover {
             background: #218838;
+        }
+        .order-btn.added {
+            background: #28a745;
+            animation: buttonPulse 0.3s ease;
+        }
+        .order-btn.added:hover {
+            background: #28a745;
+        }
+        @keyframes buttonPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
         .cart-modal {
             position: fixed;
@@ -483,7 +533,7 @@
             console.log('Cart cleared');
         }
         
-        function addToCart(name, price, options = '', optionPrices = '') {
+        function addToCart(name, price, options = '', optionPrices = '', buttonElement = null) {
             // Check if item has options and show options modal
             if (options && !currentItemForOptions) {
                 currentItemForOptions = { name, price, options, optionPrices };
@@ -508,6 +558,41 @@
                 });
             }
             saveCart();
+            
+            // Visual feedback
+            showAddToCartFeedback(buttonElement, name);
+        }
+        
+        function showAddToCartFeedback(buttonElement, itemName) {
+            // 1. Button feedback
+            if (buttonElement) {
+                const originalText = buttonElement.textContent;
+                buttonElement.textContent = 'Added!';
+                buttonElement.classList.add('added');
+                
+                setTimeout(() => {
+                    buttonElement.textContent = originalText;
+                    buttonElement.classList.remove('added');
+                }, 2000);
+                
+                // 2. Item highlight
+                const itemElement = buttonElement.closest('.item');
+                if (itemElement) {
+                    itemElement.classList.add('added-flash');
+                    setTimeout(() => {
+                        itemElement.classList.remove('added-flash');
+                    }, 1000);
+                }
+            }
+            
+            // 3. Cart counter bounce
+            const cartCounter = document.getElementById('cart-counter');
+            if (cartCounter) {
+                cartCounter.classList.add('bounce');
+                setTimeout(() => {
+                    cartCounter.classList.remove('bounce');
+                }, 500);
+            }
         }
         
         function showOptionsModal(itemName, optionsString, optionPricesString = '') {
@@ -620,6 +705,9 @@
                 });
             }
             saveCart();
+            
+            // Visual feedback for options modal
+            showAddToCartFeedback(null, name);
         }
         
         function removeFromCart(itemKey) {
@@ -868,15 +956,23 @@
                         const description = item['Description'] || '';
                         const options = item['Option'] || item['Options'] || '';
                         const optionPrices = item['Option Price'] || item['option price'] || '';
+                        const rawImageUrl = item['Image'] || item['image'] || '';
+                        const imageUrl = fixGoogleDriveUrl(rawImageUrl);
                         
                         return `
                             <div class="item">
-                                <div class="item-info">
-                                    <div class="item-name">${name}</div>
-                                    ${description ? `<div class="item-description">${description}</div>` : ''}
+                                <div class="item-content">
+                                    ${imageUrl ? 
+                                        `<img src="${imageUrl}" alt="${name}" class="item-image" onerror="this.style.display='none'">` : 
+                                        `<div class="item-image" style="background-color: #e9ecef; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6c757d;">No Image</div>`
+                                    }
+                                    <div class="item-text">
+                                        <div class="item-name">${name}</div>
+                                        ${description ? `<div class="item-description">${description}</div>` : ''}
+                                    </div>
                                 </div>
                                 <div class="item-actions">
-                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}')">Order Now</button>
+                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}', this)">Order Now</button>
                                     <div class="item-price">${price}</div>
                                 </div>
                             </div>
@@ -899,15 +995,23 @@
                         const description = item['Description'] || '';
                         const options = item['Option'] || item['Options'] || '';
                         const optionPrices = item['Option Price'] || item['option price'] || '';
+                        const rawImageUrl = item['Image'] || item['image'] || '';
+                        const imageUrl = fixGoogleDriveUrl(rawImageUrl);
                         
                         return `
                             <div class="item">
-                                <div class="item-info">
-                                    <div class="item-name">${name}</div>
-                                    ${description ? `<div class="item-description">${description}</div>` : ''}
+                                <div class="item-content">
+                                    ${imageUrl ? 
+                                        `<img src="${imageUrl}" alt="${name}" class="item-image" onerror="this.style.display='none'">` : 
+                                        `<div class="item-image" style="background-color: #e9ecef; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6c757d;">No Image</div>`
+                                    }
+                                    <div class="item-text">
+                                        <div class="item-name">${name}</div>
+                                        ${description ? `<div class="item-description">${description}</div>` : ''}
+                                    </div>
                                 </div>
                                 <div class="item-actions">
-                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}')">Order Now</button>
+                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}', this)">Order Now</button>
                                     <div class="item-price">${price}</div>
                                 </div>
                             </div>
@@ -942,6 +1046,39 @@
             
             container.innerHTML = categoriesHTML;
         }
+        
+        // Image URL helper function
+        function fixGoogleDriveUrl(url) {
+            if (!url) return '';
+            
+            // If it's already the thumbnail format, return as is
+            if (url.includes('thumbnail')) return url;
+            
+            // Extract file ID from various Google Drive URL formats
+            let fileId = null;
+            
+            // From uc?id= format
+            let match = url.match(/uc\?(?:export=view&)?id=([a-zA-Z0-9_-]+)/);
+            if (match) {
+                fileId = match[1];
+            }
+            
+            // From sharing links
+            if (!fileId) {
+                match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+                if (match) {
+                    fileId = match[1];
+                }
+            }
+            
+            // Convert to thumbnail format which works more reliably
+            if (fileId) {
+                return `https://drive.google.com/thumbnail?id=${fileId}&sz=w400-h300`;
+            }
+            
+            return url;
+        }
+        
         
         // Table functionality
         let currentTable = null;
