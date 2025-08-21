@@ -855,7 +855,7 @@
             // Create HTML for each category
             const categoriesHTML = Object.keys(categories).map(categoryName => {
                 const categoryData = categories[categoryName];
-                const categoryId = categoryName.replace(/\s+/g, '-').toLowerCase();
+                const categoryId = categoryName.replace(/\s+/g, '-').replace(/'/g, '').toLowerCase();
                 
                 // Create content for this category
                 let categoryContentHTML = '';
@@ -891,7 +891,7 @@
                     if (subcategoryName === '_direct') return; // Skip direct items, already handled
                     
                     const subcategoryItems = categoryData[subcategoryName];
-                    const subcategoryId = subcategoryName.replace(/\s+/g, '-').toLowerCase();
+                    const subcategoryId = subcategoryName.replace(/\s+/g, '-').replace(/'/g, '').toLowerCase();
                     
                     const subcategoryItemsHTML = subcategoryItems.map(item => {
                         const name = item['Item Name'] || 'Unnamed Item';
