@@ -408,20 +408,24 @@
         @media (max-width: 768px) {
             .item {
                 padding: 15px;
-                flex-direction: column;
-                align-items: stretch;
+                /* Keep horizontal flex layout - don't stack */
+                flex-direction: row;
+                align-items: flex-start;
             }
             .item-content {
-                margin-bottom: 15px;
+                /* No bottom margin - keep horizontal layout */
+                margin-bottom: 0;
             }
             .item-actions {
-                align-items: stretch;
-                margin-left: 0;
-                min-width: auto;
+                /* Keep right alignment */
+                align-items: flex-end;
+                margin-left: 10px;
+                min-width: 100px;
             }
             .order-btn {
-                width: 100%;
-                text-align: center;
+                /* Don't make full width - keep compact */
+                padding: 8px 12px;
+                font-size: 13px;
             }
             .item-description {
                 font-size: 13px;
@@ -439,6 +443,8 @@
         @media (max-width: 480px) {
             .item {
                 padding: 12px;
+                /* Keep horizontal layout even on small screens */
+                flex-direction: row;
             }
             .item-description {
                 font-size: 12px;
@@ -450,10 +456,15 @@
             .item-image {
                 width: 70px;
                 height: 55px;
+                margin-right: 12px;
+            }
+            .item-actions {
+                margin-left: 8px;
+                min-width: 90px;
             }
             .order-btn {
-                padding: 8px 15px;
-                font-size: 14px;
+                padding: 6px 10px;
+                font-size: 12px;
             }
         }
         .options-modal {
