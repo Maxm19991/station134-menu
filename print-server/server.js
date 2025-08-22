@@ -4,7 +4,7 @@ const path = require('path');
 const { ThermalPrinter, PrinterTypes, CharacterSet, BreakLine } = require('node-thermal-printer');
 
 // Configuration
-const WEBHOOK_URL = 'https://68a78e63b6598965dcaab232--graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions/store-order';
+const WEBHOOK_URL = 'https://graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions/store-order';
 const POLL_INTERVAL = 30000; // Check every 30 seconds
 const PROCESSED_ORDERS_FILE = path.join(__dirname, 'processed-orders.json');
 

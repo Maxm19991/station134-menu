@@ -66,7 +66,7 @@ exports.handler = async (event, context) => {
         };
         
         // Store order using Netlify function
-        const storeResponse = await fetch(`${event.headers.origin || 'https://68a78e63b6598965dcaab232--graceful-lebkuchen-da9a1f.netlify.app'}/.netlify/functions/store-order`, {
+        const storeResponse = await fetch(`${event.headers.origin || 'https://graceful-lebkuchen-da9a1f.netlify.app'}/.netlify/functions/store-order`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
