@@ -1,0 +1,17 @@
+{
+  "name": "station134-print-server",
+  "version": "1.0.0",
+  "description": "Local print server for Station 134 orders",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "node-thermal-printer": "^4.4.4",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

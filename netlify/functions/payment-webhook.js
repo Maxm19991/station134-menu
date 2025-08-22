@@ -1,4 +1,5 @@
 const { createMollieClient } = require('@mollie/api-client');
+const fetch = require('node-fetch');
 
 exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
@@ -54,11 +55,31 @@ exports.handler = async (event, context) => {
         items: payment.metadata?.orderItems
       });
       
-      // Here you could:
-      // - Send email confirmation
-      // - Save order to database
-      // - Notify restaurant staff
-      // - Send to POS system
+      // Store order for printing
+      try {
+        const orderData = {
+          table: payment.metadata?.table || 'Unknown',
+          items: JSON.parse(payment.metadata?.orderItems || '[]'),
+          total: parseFloat(payment.amount.value),
+          paymentId: payment.id,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Store order using Netlify function
+        const storeResponse = await fetch(`${event.headers.origin || 'https://68a78e63b6598965dcaab232--graceful-lebkuchen-da9a1f.netlify.app'}/.netlify/functions/store-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+        
+        if (storeResponse.ok) {
+          console.log('Order stored for printing');
+        } else {
+          console.error('Failed to store order for printing');
+        }
+      } catch (storeError) {
+        console.error('Error storing order:', storeError);
+      }
     } else if (payment.isFailed() || payment.isExpired() || payment.isCanceled()) {
       console.log('Payment failed/expired/canceled:', {
         id: payment.id,
