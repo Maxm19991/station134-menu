@@ -57,6 +57,12 @@ exports.handler = async (event, context) => {
       
       // Store order for printing
       try {
+        console.log('Storing order for printing...', {
+          table: payment.metadata?.table,
+          paymentId: payment.id,
+          amount: payment.amount.value
+        });
+        
         const orderData = {
           table: payment.metadata?.table || 'Unknown',
           items: JSON.parse(payment.metadata?.orderItems || '[]'),
@@ -65,17 +71,22 @@ exports.handler = async (event, context) => {
           timestamp: new Date().toISOString()
         };
         
+        console.log('Order data prepared:', orderData);
+        
         // Store order using Netlify function
-        const storeResponse = await fetch(`${event.headers.origin || 'https://graceful-lebkuchen-da9a1f.netlify.app'}/.netlify/functions/store-order`, {
+        const storeResponse = await fetch('https://graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions/store-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
         });
         
+        const responseText = await storeResponse.text();
+        console.log('Store order response:', storeResponse.status, responseText);
+        
         if (storeResponse.ok) {
-          console.log('Order stored for printing');
+          console.log('Order stored successfully for printing');
         } else {
-          console.error('Failed to store order for printing');
+          console.error('Failed to store order for printing:', storeResponse.status, responseText);
         }
       } catch (storeError) {
         console.error('Error storing order:', storeError);
