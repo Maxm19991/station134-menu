@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Order Storage</title>
+</head>
+<body>
+    <h1>Test Order Storage</h1>
+    <button onclick="testStoreOrder()">Store Test Order</button>
+    <div id="result"></div>
+
+    <script>
+        async function testStoreOrder() {
+            try {
+                const testOrder = {
+                    table: "Test Table 5",
+                    items: [
+                        { name: "Test Frites", price: "€3,50", quantity: 2 },
+                        { name: "Test Cola", price: "€2,50", quantity: 1 }
+                    ],
+                    total: 9.50,
+                    paymentId: "test_payment_123",
+                    timestamp: new Date().toISOString()
+                };
+
+                console.log('Storing test order:', testOrder);
+
+                const response = await fetch('https://graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions/store-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testOrder)
+                });
+
+                const result = await response.text();
+                console.log('Response:', response.status, result);
+                
+                document.getElementById('result').innerHTML = `
+                    <p>Status: ${response.status}</p>
+                    <p>Response: ${result}</p>
+                `;
+
+                if (response.ok) {
+                    alert('Test order stored! Check print server in 30 seconds.');
+                } else {
+                    alert('Failed to store test order: ' + result);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

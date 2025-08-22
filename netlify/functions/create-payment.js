@@ -69,14 +69,14 @@ exports.handler = async (event, context) => {
     };
 
     // Get the site URL from headers
-    const siteUrl = event.headers.origin || 'https://maxm19991.github.io/station134-menu';
+    const siteUrl = event.headers.origin || 'https://graceful-lebkuchen-da9a1f.netlify.app';
 
     // Create payment with Mollie
     const payment = await mollieClient.payments.create({
       amount: totalAmount,
       description: orderDescription,
       redirectUrl: `${siteUrl}?payment=success`,
-      webhookUrl: `${siteUrl}/.netlify/functions/payment-webhook`,
+      webhookUrl: `https://graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions/payment-webhook`,
       metadata: {
         table: table,
         orderItems: JSON.stringify(items),

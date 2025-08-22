@@ -2,6 +2,14 @@ const { createMollieClient } = require('@mollie/api-client');
 const fetch = require('node-fetch');
 
 exports.handler = async (event, context) => {
+  // Handle GET requests for testing
+  if (event.httpMethod === 'GET') {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ status: 'Webhook is working', message: 'Ready to receive Mollie notifications' })
+    };
+  }
+  
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
