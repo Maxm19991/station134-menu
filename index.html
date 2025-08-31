@@ -1274,6 +1274,11 @@
             }
         }
         
+        // Clear cart when user closes/leaves the website
+        window.addEventListener('beforeunload', () => {
+            localStorage.removeItem('station134-cart');
+        });
+        
         // Load items when page loads
         document.addEventListener('DOMContentLoaded', () => {
             displayTableInfo();
