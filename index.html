@@ -543,9 +543,34 @@
     <!-- Cart Modal -->
     <div id="cart-modal" class="cart-modal" onclick="closeCartIfClickedOutside(event)">
         <div class="cart-content" onclick="event.stopPropagation()">
-            <h2>Shopping Cart</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">Shopping Cart</h2>
+                <button onclick="toggleCart()" style="background: none; border: none; font-size: 24px; color: #666; cursor: pointer; padding: 5px; border-radius: 3px;" onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='none'">&times;</button>
+            </div>
             <div id="cart-items"></div>
             <div id="cart-total" class="cart-total"></div>
+            <div style="margin: 20px 0;">
+                <label for="order-comment" style="display: block; font-weight: bold; margin-bottom: 5px; color: #333;">Opmerking voor uw bestelling (optioneel):</label>
+                <textarea id="order-comment" placeholder="Bijv. allergieën, speciale wensen..." maxlength="500" style="width: 100%; height: 80px; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-family: inherit; resize: vertical; box-sizing: border-box;"></textarea>
+                <div style="text-align: right; font-size: 12px; color: #666; margin-top: 5px;">
+                    <span id="comment-counter">0</span>/500 karakters
+                </div>
+            </div>
+            <div style="margin: 20px 0;">
+                <div style="font-weight: bold; margin-bottom: 10px; color: #333;">Fooi (optioneel):</div>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <button class="btn" id="tip-5" onclick="selectTip(0.05)" style="flex: 1; background: #6c757d; padding: 10px;">5%</button>
+                    <button class="btn" id="tip-10" onclick="selectTip(0.10)" style="flex: 1; background: #6c757d; padding: 10px;">10%</button>
+                    <button class="btn" id="tip-custom-btn" onclick="toggleCustomTip()" style="flex: 1; background: #6c757d; padding: 10px;">Anders</button>
+                </div>
+                <div id="custom-tip-input" style="display: none; margin-top: 10px;">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="custom-tip" placeholder="€0,00" style="flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 5px; font-family: inherit; box-sizing: border-box;" oninput="formatCustomTipInput()" onkeypress="handleCustomTipKeypress(event)">
+                        <button class="btn" onclick="confirmCustomTip()" style="background: #dc3545; padding: 10px 15px;">OK</button>
+                    </div>
+                </div>
+                <div id="tip-amount" style="text-align: right; font-size: 14px; color: #666; margin-top: 5px; display: none;"></div>
+            </div>
             <button class="btn order-cart-btn" id="order-cart-btn" onclick="placeOrder()">Bestel nu</button>
             <button class="btn close-cart" onclick="clearCart()" style="background: #ffc107; color: #000;">Clear Cart</button>
             <button class="btn close-cart" onclick="toggleCart()">Close</button>
@@ -616,7 +641,17 @@
         
         function clearCart() {
             cart = [];
+            currentTip = 0;
+            tipType = 'none';
             localStorage.removeItem('station134-cart');
+            
+            // Reset tip UI
+            document.getElementById('tip-5').style.background = '#6c757d';
+            document.getElementById('tip-10').style.background = '#6c757d';
+            document.getElementById('tip-custom-btn').style.background = '#6c757d';
+            document.getElementById('custom-tip-input').style.display = 'none';
+            document.getElementById('custom-tip').value = '';
+            
             updateCartCounter();
             updateCartDisplay();
             console.log('Cart cleared');
@@ -691,20 +726,49 @@
             
             title.textContent = `Choose options for ${itemName}`;
             
-            // Debug logging
-            console.log('Options:', optionsString);
-            console.log('Option Prices:', optionPricesString);
+            // Debug logging - detailed breakdown
+            console.log('=== OPTIONS MODAL DEBUG ===');
+            console.log('Item Name:', itemName);
+            console.log('Raw Options String:', optionsString);
+            console.log('Raw Option Prices String:', optionPricesString);
+            console.log('Options String Length:', optionsString.length);
+            console.log('Options String Type:', typeof optionsString);
             
-            // Parse options: "Sauce:Ketchup,Mayo,Curry;Size:Small,Medium,Large"
+            // Parse options: "saus frites:Ketchup,Mayo,Curry;saus snack:Ketchup,Mayo,Curry"
             const optionGroups = optionsString.split(';');
             // Parse option prices: "0.50,0.75,0.50;1.00,2.00,3.00" (matching option groups)
             const priceGroups = optionPricesString ? optionPricesString.split(';') : [];
             let formHTML = '';
             
+            console.log('Option Groups after split:', optionGroups);
+            console.log('Price Groups after split:', priceGroups);
+            
+            // Determine if we have two option groups (use dropdowns) or one (use radio buttons)
+            const hasTwoGroups = optionGroups.length === 2;
+            
             optionGroups.forEach((group, groupIndex) => {
-                const [optionName, choices] = group.split(':');
-                if (optionName && choices) {
-                    const choiceList = choices.split(',');
+                console.log('Processing group:', group);
+                
+                // Split on first colon to get main category
+                const firstColonIndex = group.indexOf(':');
+                if (firstColonIndex === -1) return;
+                
+                const optionName = group.substring(0, firstColonIndex);
+                const remaining = group.substring(firstColonIndex + 1);
+                
+                // Split the remaining part on second colon to get choices
+                const secondColonIndex = remaining.indexOf(':');
+                if (secondColonIndex === -1) return;
+                
+                const subcategoryName = remaining.substring(0, secondColonIndex);
+                const choicesString = remaining.substring(secondColonIndex + 1);
+                
+                console.log('Option Name:', optionName);
+                console.log('Subcategory:', subcategoryName);
+                console.log('Choices String:', choicesString);
+                
+                if (optionName && choicesString) {
+                    const choiceList = choicesString.split(',');
                     const priceList = priceGroups[groupIndex] ? priceGroups[groupIndex].split(',') : [];
                     
                     console.log(`Group ${groupIndex}:`, choiceList, 'Prices:', priceList);
@@ -714,21 +778,41 @@
                             <div class="option-label">${optionName.trim()}:</div>
                     `;
                     
-                    choiceList.forEach((choice, choiceIndex) => {
-                        const inputId = `option-${groupIndex}-${choiceIndex}`;
-                        const priceString = priceList[choiceIndex] ? priceList[choiceIndex].trim() : '0';
-                        const price = parseFloat(priceString) || 0;
-                        const priceDisplay = price > 0 ? ` (+€${price.toFixed(2).replace('.', ',')})` : '';
+                    if (hasTwoGroups) {
+                        // Use dropdown for two option groups
+                        formHTML += `<select name="option-${groupIndex}" id="option-select-${groupIndex}" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-family: inherit; font-size: 14px; margin: 5px 0;">`;
                         
-                        console.log(`Choice: ${choice.trim()}, Price string: "${priceString}", Parsed price: ${price}`);
+                        choiceList.forEach((choice, choiceIndex) => {
+                            const priceString = priceList[choiceIndex] ? priceList[choiceIndex].trim() : '0';
+                            const price = parseFloat(priceString) || 0;
+                            const priceDisplay = price > 0 ? ` (+€${price.toFixed(2).replace('.', ',')})` : '';
+                            
+                            formHTML += `
+                                <option value="${choice.trim()}" data-price="${price}" ${choiceIndex === 0 ? 'selected' : ''}>
+                                    ${choice.trim()}${priceDisplay}
+                                </option>
+                            `;
+                        });
                         
-                        formHTML += `
-                            <label class="option-choice">
-                                <input type="radio" name="option-${groupIndex}" value="${choice.trim()}" data-price="${price}" id="${inputId}" ${choiceIndex === 0 ? 'checked' : ''}>
-                                ${choice.trim()}${priceDisplay}
-                            </label>
-                        `;
-                    });
+                        formHTML += `</select>`;
+                    } else {
+                        // Use radio buttons for single option group
+                        choiceList.forEach((choice, choiceIndex) => {
+                            const inputId = `option-${groupIndex}-${choiceIndex}`;
+                            const priceString = priceList[choiceIndex] ? priceList[choiceIndex].trim() : '0';
+                            const price = parseFloat(priceString) || 0;
+                            const priceDisplay = price > 0 ? ` (+€${price.toFixed(2).replace('.', ',')})` : '';
+                            
+                            console.log(`Choice: ${choice.trim()}, Price string: "${priceString}", Parsed price: ${price}`);
+                            
+                            formHTML += `
+                                <label class="option-choice">
+                                    <input type="radio" name="option-${groupIndex}" value="${choice.trim()}" data-price="${price}" id="${inputId}" ${choiceIndex === 0 ? 'checked' : ''}>
+                                    ${choice.trim()}${priceDisplay}
+                                </label>
+                            `;
+                        });
+                    }
                     
                     formHTML += '</div>';
                 }
@@ -756,11 +840,20 @@
             const form = document.getElementById('options-form');
             const selectedOptions = [];
             const selectedPrices = [];
-            const radioGroups = form.querySelectorAll('input[type="radio"]:checked');
             
+            // Handle radio buttons (for single option groups)
+            const radioGroups = form.querySelectorAll('input[type="radio"]:checked');
             radioGroups.forEach(radio => {
                 selectedOptions.push(radio.value);
                 selectedPrices.push(parseFloat(radio.getAttribute('data-price')) || 0);
+            });
+            
+            // Handle dropdowns (for two option groups)
+            const dropdowns = form.querySelectorAll('select');
+            dropdowns.forEach(select => {
+                const selectedOption = select.options[select.selectedIndex];
+                selectedOptions.push(selectedOption.value);
+                selectedPrices.push(parseFloat(selectedOption.getAttribute('data-price')) || 0);
             });
             
             const optionsText = selectedOptions.join(', ');
@@ -824,7 +917,133 @@
             modal.style.display = isVisible ? 'none' : 'flex';
             if (!isVisible) {
                 updateCartDisplay();
+                updateCommentCounter();
             }
+        }
+        
+        function updateCommentCounter() {
+            const commentField = document.getElementById('order-comment');
+            const counter = document.getElementById('comment-counter');
+            if (commentField && counter) {
+                counter.textContent = commentField.value.length;
+            }
+        }
+        
+        let currentTip = 0;
+        let tipType = 'none'; // 'none', 'percentage', 'custom'
+        
+        function selectTip(percentage) {
+            tipType = 'percentage';
+            
+            // Reset all tip buttons
+            document.getElementById('tip-5').style.background = '#6c757d';
+            document.getElementById('tip-10').style.background = '#6c757d';
+            document.getElementById('tip-custom-btn').style.background = '#6c757d';
+            
+            // Hide custom input
+            document.getElementById('custom-tip-input').style.display = 'none';
+            document.getElementById('custom-tip').value = '';
+            
+            // Highlight selected button
+            if (percentage === 0.05) {
+                document.getElementById('tip-5').style.background = '#dc3545';
+            } else if (percentage === 0.10) {
+                document.getElementById('tip-10').style.background = '#dc3545';
+            }
+            
+            updateTipDisplay(percentage);
+        }
+        
+        function toggleCustomTip() {
+            const customInput = document.getElementById('custom-tip-input');
+            const customBtn = document.getElementById('tip-custom-btn');
+            
+            if (customInput.style.display === 'none') {
+                // Show custom input
+                customInput.style.display = 'block';
+                customBtn.style.background = '#dc3545';
+                
+                // Reset percentage buttons
+                document.getElementById('tip-5').style.background = '#6c757d';
+                document.getElementById('tip-10').style.background = '#6c757d';
+                
+                tipType = 'custom';
+                document.getElementById('custom-tip').focus();
+            } else {
+                // Hide custom input and reset
+                customInput.style.display = 'none';
+                customBtn.style.background = '#6c757d';
+                document.getElementById('custom-tip').value = '';
+                tipType = 'none';
+                currentTip = 0;
+                updateCartDisplay();
+            }
+        }
+        
+        function formatCustomTipInput() {
+            const input = document.getElementById('custom-tip');
+            let value = input.value;
+            
+            // Remove non-numeric characters except comma and dot
+            value = value.replace(/[^0-9,.]/g, '');
+            
+            // Replace dots with commas for European formatting
+            value = value.replace(/\./g, ',');
+            
+            // Only allow one comma
+            const commaIndex = value.indexOf(',');
+            if (commaIndex !== -1) {
+                value = value.substring(0, commaIndex + 1) + value.substring(commaIndex + 1).replace(/,/g, '');
+                // Limit to 2 decimal places after comma
+                if (value.length > commaIndex + 3) {
+                    value = value.substring(0, commaIndex + 3);
+                }
+            }
+            
+            // Add € prefix if not present
+            if (value && !value.startsWith('€')) {
+                value = '€' + value;
+            }
+            
+            input.value = value;
+        }
+        
+        function handleCustomTipKeypress(event) {
+            if (event.key === 'Enter') {
+                confirmCustomTip();
+            }
+        }
+        
+        function confirmCustomTip() {
+            const input = document.getElementById('custom-tip');
+            let value = input.value;
+            
+            // Extract numeric value
+            value = value.replace('€', '').replace(',', '.');
+            const customValue = parseFloat(value) || 0;
+            
+            if (customValue >= 0) {
+                tipType = 'custom';
+                currentTip = customValue;
+                
+                // Format the display value properly
+                input.value = `€${customValue.toFixed(2).replace('.', ',')}`;
+                
+                updateCartDisplay();
+            }
+        }
+        
+        function updateTipDisplay(percentage = null) {
+            const subtotal = cart.reduce((sum, item) => {
+                const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.'));
+                return sum + (itemPrice * item.quantity);
+            }, 0);
+            
+            if (percentage !== null) {
+                currentTip = subtotal * percentage;
+            }
+            
+            updateCartDisplay();
         }
         
         function closeCartIfClickedOutside(event) {
@@ -871,22 +1090,40 @@
                 `;
             }).join('');
             
-            cartTotal.innerHTML = `Total: €${total.toFixed(2).replace('.', ',')}`;
+            // Calculate final total with tip
+            const finalTotal = total + currentTip;
+            
+            // Display subtotal, tip, and total
+            let totalHTML = `Subtotaal: €${total.toFixed(2).replace('.', ',')}`;
+            if (currentTip > 0) {
+                totalHTML += `<br>Fooi: €${currentTip.toFixed(2).replace('.', ',')}`;
+                totalHTML += `<br><strong>Totaal: €${finalTotal.toFixed(2).replace('.', ',')}</strong>`;
+            } else {
+                totalHTML = `<strong>Totaal: €${total.toFixed(2).replace('.', ',')}</strong>`;
+            }
+            
+            cartTotal.innerHTML = totalHTML;
         }
         
         async function placeOrder() {
             if (cart.length === 0) return;
             
-            const total = cart.reduce((sum, item) => {
+            const subtotal = cart.reduce((sum, item) => {
                 const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.'));
                 return sum + (itemPrice * item.quantity);
             }, 0);
             
+            const finalTotal = subtotal + currentTip;
+            const comment = document.getElementById('order-comment').value.trim();
+            
             const orderData = {
                 table: currentTable || 'Geen tafel',
                 items: cart,
-                total: total,
-                currency: 'EUR'
+                subtotal: subtotal,
+                tip: currentTip,
+                total: finalTotal,
+                currency: 'EUR',
+                comment: comment
             };
             
             // Show loading state
@@ -963,10 +1200,18 @@
                     const orderData = JSON.parse(pendingOrder);
                     
                     // Show success message
-                    alert(`Betaling succesvol!\n\nBedankt voor uw bestelling!\n\nTafel: ${orderData.table}\nTotaal: €${orderData.total.toFixed(2).replace('.', ',')}`);
+                    let successMessage = `Betaling succesvol!\n\nBedankt voor uw bestelling!\n\nTafel: ${orderData.table}`;
+                    if (orderData.subtotal && orderData.tip > 0) {
+                        successMessage += `\nSubtotaal: €${orderData.subtotal.toFixed(2).replace('.', ',')}`;
+                        successMessage += `\nFooi: €${orderData.tip.toFixed(2).replace('.', ',')}`;
+                    }
+                    successMessage += `\nTotaal: €${orderData.total.toFixed(2).replace('.', ',')}`;
+                    alert(successMessage);
                     
-                    // Clear cart and pending order
+                    // Clear cart, tip, and pending order
                     cart = [];
+                    currentTip = 0;
+                    tipType = 'none';
                     saveCart();
                     updateCartDisplay();
                     localStorage.removeItem('pending-order');
@@ -1123,8 +1368,45 @@
                         const name = item['Item Name'] || 'Unnamed Item';
                         const price = item['Price'] || 'Price not available';
                         const description = item['Description'] || '';
-                        const options = item['Option'] || item['Options'] || '';
-                        const optionPrices = item['Option Price'] || item['option price'] || '';
+                        const option1 = item['Option'] || item['Options'] || item['option'] || item['options'] || '';
+                        const option1Prices = item['Option Price'] || item['option price'] || item['Option price'] || item['OptionPrice'] || '';
+                        const option2 = item['Option 2'] || item['option 2'] || item['Option2'] || item['Options 2'] || '';
+                        const option2Prices = item['Option 2 Price'] || item['option 2 price'] || item['Option2Price'] || item['Option 2 price'] || '';
+                        
+                        // Debug logging for the first few items
+                        if (item['Item Name'] && (option1 || option2)) {
+                            console.log('Item:', item['Item Name']);
+                            console.log('Available columns:', Object.keys(item));
+                            console.log('Option1:', option1);
+                            console.log('Option1Prices:', option1Prices);
+                            console.log('Option2:', option2);
+                            console.log('Option2Prices:', option2Prices);
+                        }
+                        
+                        // Combine options with labels
+                        let combinedOptions = '';
+                        let combinedPrices = '';
+                        
+                        if (option1) {
+                            combinedOptions = `saus frites:${option1}`;
+                            combinedPrices = option1Prices;
+                        }
+                        
+                        if (option2) {
+                            // If option2 has no prices but option1 does, use option1 prices for option2
+                            const pricesForOption2 = option2Prices || option1Prices;
+                            
+                            if (combinedOptions) {
+                                combinedOptions += `;saus snack:${option2}`;
+                                combinedPrices += `;${pricesForOption2}`;
+                            } else {
+                                combinedOptions = `saus snack:${option2}`;
+                                combinedPrices = pricesForOption2;
+                            }
+                        }
+                        
+                        const options = combinedOptions;
+                        const optionPrices = combinedPrices;
                         const rawImageUrl = item['Image'] || item['image'] || '';
                         const imageUrl = fixGoogleDriveUrl(rawImageUrl);
                         
@@ -1162,8 +1444,45 @@
                         const name = item['Item Name'] || 'Unnamed Item';
                         const price = item['Price'] || 'Price not available';
                         const description = item['Description'] || '';
-                        const options = item['Option'] || item['Options'] || '';
-                        const optionPrices = item['Option Price'] || item['option price'] || '';
+                        const option1 = item['Option'] || item['Options'] || item['option'] || item['options'] || '';
+                        const option1Prices = item['Option Price'] || item['option price'] || item['Option price'] || item['OptionPrice'] || '';
+                        const option2 = item['Option 2'] || item['option 2'] || item['Option2'] || item['Options 2'] || '';
+                        const option2Prices = item['Option 2 Price'] || item['option 2 price'] || item['Option2Price'] || item['Option 2 price'] || '';
+                        
+                        // Debug logging for the first few items
+                        if (item['Item Name'] && (option1 || option2)) {
+                            console.log('Item:', item['Item Name']);
+                            console.log('Available columns:', Object.keys(item));
+                            console.log('Option1:', option1);
+                            console.log('Option1Prices:', option1Prices);
+                            console.log('Option2:', option2);
+                            console.log('Option2Prices:', option2Prices);
+                        }
+                        
+                        // Combine options with labels
+                        let combinedOptions = '';
+                        let combinedPrices = '';
+                        
+                        if (option1) {
+                            combinedOptions = `saus frites:${option1}`;
+                            combinedPrices = option1Prices;
+                        }
+                        
+                        if (option2) {
+                            // If option2 has no prices but option1 does, use option1 prices for option2
+                            const pricesForOption2 = option2Prices || option1Prices;
+                            
+                            if (combinedOptions) {
+                                combinedOptions += `;saus snack:${option2}`;
+                                combinedPrices += `;${pricesForOption2}`;
+                            } else {
+                                combinedOptions = `saus snack:${option2}`;
+                                combinedPrices = pricesForOption2;
+                            }
+                        }
+                        
+                        const options = combinedOptions;
+                        const optionPrices = combinedPrices;
                         const rawImageUrl = item['Image'] || item['image'] || '';
                         const imageUrl = fixGoogleDriveUrl(rawImageUrl);
                         
@@ -1285,6 +1604,13 @@
             loadItemsFromSheet();
             updateCartCounter();
             handlePaymentReturn();
+            
+            // Add event listener for comment field character counter
+            document.addEventListener('input', (e) => {
+                if (e.target.id === 'order-comment') {
+                    updateCommentCounter();
+                }
+            });
         });
     </script>
 </body>
