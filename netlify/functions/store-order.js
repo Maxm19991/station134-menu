@@ -1,31 +1,21 @@
-// Simple order storage using Netlify Functions
-// This stores orders in a way that can be retrieved by the print server
-
-const fs = require('fs');
-const path = require('path');
-
-// Use file-based storage since Netlify functions are stateless
-const ORDERS_FILE = '/tmp/orders.json';
+// Order storage using environment variables for persistence
+// Since Netlify functions are stateless, we use environment variables as simple storage
 
 function loadOrders() {
   try {
-    if (fs.existsSync(ORDERS_FILE)) {
-      const data = fs.readFileSync(ORDERS_FILE, 'utf8');
-      return JSON.parse(data);
+    const ordersData = process.env.STORED_ORDERS;
+    if (ordersData) {
+      return JSON.parse(ordersData);
     }
   } catch (error) {
-    console.error('Error loading orders:', error);
+    console.error('Error loading orders from env:', error);
   }
   return [];
 }
 
-function saveOrders(orders) {
-  try {
-    fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
-  } catch (error) {
-    console.error('Error saving orders:', error);
-  }
-}
+// For now, we'll store orders in memory and return them immediately
+// This is a simple fix - in production you'd use a database
+let inMemoryOrders = [];
 
 exports.handler = async (event, context) => {
   // Enable CORS
@@ -52,10 +42,8 @@ exports.handler = async (event, context) => {
         printed: false
       };
       
-      // Load existing orders and add new one
-      const orders = loadOrders();
-      orders.push(orderData);
-      saveOrders(orders);
+      // Store in memory for immediate retrieval
+      inMemoryOrders.push(orderData);
       
       console.log('Order stored:', orderId);
       
@@ -76,13 +64,12 @@ exports.handler = async (event, context) => {
 
   if (event.httpMethod === 'GET') {
     try {
-      // Return all unprinted orders
-      const orders = loadOrders();
-      const unprintedOrders = orders
+      // Return all unprinted orders from memory
+      const unprintedOrders = inMemoryOrders
         .filter(order => !order.printed)
         .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
       
-      console.log(`Returning ${unprintedOrders.length} unprinted orders`);
+      console.log(`Returning ${unprintedOrders.length} unprinted orders from ${inMemoryOrders.length} total orders`);
       
       return {
         statusCode: 200,

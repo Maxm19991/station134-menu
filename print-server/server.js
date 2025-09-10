@@ -15,7 +15,8 @@ function initializePrinter() {
     try {
         printer = new ThermalPrinter({
             type: PrinterTypes.EPSON,
-            interface: 'printer:TM-T88V', // Adjust this to match your printer name in Windows
+            interface: 'printer:EPSON TM-T88VII Receipt (1)',
+            driver: require('printer'),
             characterSet: CharacterSet.PC852_LATIN2,
             removeSpecialCharacters: false,
             lineCharacter: "=",
@@ -212,5 +213,55 @@ process.on('SIGINT', () => {
     process.exit(0);
 });
 
-// Start the server
-startPrintServer();
+// Test order function
+async function printTestOrder() {
+    const testOrder = {
+        id: 'TEST-' + Date.now(),
+        table: '5',
+        items: [
+            {
+                name: 'Hamburger Classic',
+                price: '€12,50',
+                quantity: 2,
+                options: 'Extra kaas, geen ui'
+            },
+            {
+                name: 'Friet groot',
+                price: '€4,50',
+                quantity: 1,
+                options: null
+            },
+            {
+                name: 'Cola',
+                price: '€2,75',
+                quantity: 2,
+                options: null
+            }
+        ]
+    };
+    
+    console.log('Printing test order...');
+    const success = await printOrder(testOrder);
+    if (success) {
+        console.log('Test order printed successfully!');
+    } else {
+        console.log('Failed to print test order.');
+    }
+}
+
+// Add command line argument support for test printing
+if (process.argv.includes('--test')) {
+    console.log('Running in test mode...');
+    setTimeout(async () => {
+        if (initializePrinter()) {
+            await printTestOrder();
+            process.exit(0);
+        } else {
+            console.error('Failed to initialize printer for test');
+            process.exit(1);
+        }
+    }, 1000);
+} else {
+    // Start the server
+    startPrintServer();
+}

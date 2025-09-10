@@ -81,8 +81,8 @@ exports.handler = async (event, context) => {
         
         console.log('Order data prepared:', orderData);
         
-        // Store order using Netlify function
-        const storeResponse = await fetch('https://graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions/store-order', {
+        // Store order using new recent-orders function
+        const storeResponse = await fetch('https://graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions/recent-orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderData)
