@@ -29,7 +29,7 @@ exports.handler = async (event, context) => {
 
   try {
     // Parse request body
-    const { table, items, total, currency = 'EUR', testMode = true } = JSON.parse(event.body);
+    const { table, items, total, currency = 'EUR', testMode = true, comment, tip = 0 } = JSON.parse(event.body);
 
     // Validate required fields
     if (!items || !total || items.length === 0) {
@@ -80,7 +80,9 @@ exports.handler = async (event, context) => {
       metadata: {
         table: table,
         orderItems: JSON.stringify(items),
-        totalAmount: total.toFixed(2)
+        totalAmount: total.toFixed(2),
+        comment: comment || '',
+        tip: tip.toFixed(2)
       }
     });
 

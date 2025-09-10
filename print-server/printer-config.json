@@ -2,6 +2,6 @@
   "printerIP": "192.168.1.19",
   "printerPort": 9100,
   "webhookUrl": "https://graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions/recent-orders",
-  "pollInterval": 30000,
+  "pollInterval": 5000,
   "comment": "Change printerIP when moving printer to restaurant network"
 }

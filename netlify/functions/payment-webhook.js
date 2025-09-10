@@ -75,6 +75,8 @@ exports.handler = async (event, context) => {
           table: payment.metadata?.table || 'Unknown',
           items: JSON.parse(payment.metadata?.orderItems || '[]'),
           total: parseFloat(payment.amount.value),
+          comment: payment.metadata?.comment || '',
+          tip: parseFloat(payment.metadata?.tip || '0'),
           paymentId: payment.id,
           timestamp: new Date().toISOString()
         };

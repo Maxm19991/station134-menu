@@ -1165,6 +1165,8 @@
                         items: orderData.items,
                         total: orderData.total,
                         currency: orderData.currency,
+                        comment: orderData.comment,
+                        tip: orderData.tip,
                         testMode: USE_TEST_MODE
                     })
                 });
@@ -1179,6 +1181,15 @@
                 if (paymentData.success) {
                     // Store order data for success page
                     localStorage.setItem('pending-order', JSON.stringify(orderData));
+                    
+                    // For test mode, also store order directly (webhook backup)
+                    if (USE_TEST_MODE) {
+                        localStorage.setItem('test-order-backup', JSON.stringify({
+                            ...orderData,
+                            paymentId: paymentData.paymentId,
+                            timestamp: new Date().toISOString()
+                        }));
+                    }
                     
                     // Redirect to Mollie payment page
                     window.location.href = paymentData.paymentUrl;
@@ -1198,6 +1209,27 @@
                 const pendingOrder = localStorage.getItem('pending-order');
                 if (pendingOrder) {
                     const orderData = JSON.parse(pendingOrder);
+                    
+                    // For test mode, send backup order directly to webhook (in case Mollie webhook fails)
+                    if (USE_TEST_MODE) {
+                        const testOrderBackup = localStorage.getItem('test-order-backup');
+                        if (testOrderBackup) {
+                            const backupOrder = JSON.parse(testOrderBackup);
+                            
+                            // Send order directly to recent-orders endpoint
+                            fetch('https://graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions/recent-orders', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(backupOrder)
+                            }).then(response => {
+                                console.log('Test order backup sent:', response.status);
+                            }).catch(error => {
+                                console.error('Failed to send test order backup:', error);
+                            });
+                            
+                            localStorage.removeItem('test-order-backup');
+                        }
+                    }
                     
                     // Show success message
                     let successMessage = `Betaling succesvol!\n\nBedankt voor uw bestelling!\n\nTafel: ${orderData.table}`;
