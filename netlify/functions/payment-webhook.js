@@ -1,12 +1,21 @@
 const { createMollieClient } = require('@mollie/api-client');
 const fetch = require('node-fetch');
 
+// Track webhook calls for debugging
+global.webhookCalls = global.webhookCalls || 0;
+
 exports.handler = async (event, context) => {
+  global.webhookCalls++;
+
   // Handle GET requests for testing
   if (event.httpMethod === 'GET') {
     return {
       statusCode: 200,
-      body: JSON.stringify({ status: 'Webhook is working', message: 'Ready to receive Mollie notifications' })
+      body: JSON.stringify({
+        status: 'Webhook is working',
+        message: 'Ready to receive Mollie notifications',
+        totalCalls: global.webhookCalls
+      })
     };
   }
   
@@ -18,9 +27,16 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log('=== WEBHOOK CALLED ===');
+    console.log('Total webhook calls so far:', global.webhookCalls);
+    console.log('Webhook called with body:', event.body);
+    console.log('Webhook headers:', event.headers);
+
     const { id } = JSON.parse(event.body);
+    console.log('Extracted payment ID:', id);
 
     if (!id) {
+      console.log('ERROR: Missing payment ID in request');
       return {
         statusCode: 400,
         body: JSON.stringify({ error: 'Missing payment ID' })
@@ -35,17 +51,26 @@ exports.handler = async (event, context) => {
 
     try {
       // Try live API key first (for live payments)
+      console.log('Trying live API key for payment:', id);
       mollieClient = createMollieClient({
         apiKey: process.env.MOLLIE_LIVE_API_KEY
       });
       await mollieClient.payments.get(id);
+      console.log('Live API key worked for payment:', id);
     } catch (error) {
       // If live API fails to find payment, it might be a test payment
       console.log('Live API failed, trying test API:', error.message);
       isLivePayment = false;
-      mollieClient = createMollieClient({
-        apiKey: process.env.MOLLIE_TEST_API_KEY
-      });
+      try {
+        mollieClient = createMollieClient({
+          apiKey: process.env.MOLLIE_TEST_API_KEY
+        });
+        await mollieClient.payments.get(id);
+        console.log('Test API key worked for payment:', id);
+      } catch (testError) {
+        console.log('Both API keys failed for payment:', id, testError.message);
+        throw testError;
+      }
     }
 
     // Get payment details
