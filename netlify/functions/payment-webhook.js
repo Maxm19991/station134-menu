@@ -27,16 +27,22 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Initialize Mollie client (try both test and live keys)
+    // Initialize Mollie client with correct API key
+    // For live payments, use live key. For test payments, use test key.
+    // Since we're now in live mode, prioritize live API key
     let mollieClient;
+    let isLivePayment = true;
+
     try {
+      // Try live API key first (for live payments)
       mollieClient = createMollieClient({
         apiKey: process.env.MOLLIE_LIVE_API_KEY
       });
-      // Test if this is a live payment
       await mollieClient.payments.get(id);
     } catch (error) {
-      // If live fails, try test
+      // If live API fails to find payment, it might be a test payment
+      console.log('Live API failed, trying test API:', error.message);
+      isLivePayment = false;
       mollieClient = createMollieClient({
         apiKey: process.env.MOLLIE_TEST_API_KEY
       });
@@ -51,7 +57,8 @@ exports.handler = async (event, context) => {
       status: payment.status,
       amount: payment.amount,
       description: payment.description,
-      metadata: payment.metadata
+      metadata: payment.metadata,
+      isLivePayment: isLivePayment
     });
 
     // Handle different payment statuses
