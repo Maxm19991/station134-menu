@@ -32,8 +32,19 @@ exports.handler = async (event, context) => {
     console.log('Webhook called with body:', event.body);
     console.log('Webhook headers:', event.headers);
 
-    const { id } = JSON.parse(event.body);
-    console.log('Extracted payment ID:', id);
+    // Parse form-encoded data (Mollie sends as application/x-www-form-urlencoded)
+    let id;
+    if (event.headers['content-type'] === 'application/x-www-form-urlencoded') {
+      // Parse form data: "id=tr_xxxxx"
+      const params = new URLSearchParams(event.body);
+      id = params.get('id');
+      console.log('Parsed form-encoded payment ID:', id);
+    } else {
+      // Fallback to JSON parsing
+      const parsed = JSON.parse(event.body);
+      id = parsed.id;
+      console.log('Parsed JSON payment ID:', id);
+    }
 
     if (!id) {
       console.log('ERROR: Missing payment ID in request');
