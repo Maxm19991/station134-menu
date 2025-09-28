@@ -599,7 +599,7 @@
         const NETLIFY_FUNCTIONS_URL = window.location.hostname.includes('netlify.app') 
             ? '/.netlify/functions' 
             : 'https://graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions';
-        const USE_TEST_MODE = true; // Set to false for live payments
+        const USE_TEST_MODE = false; // Set to false for live payments
         
         // Load cart from localStorage and handle old format
         try {
