@@ -31,6 +31,8 @@ exports.handler = async (event, context) => {
     // Parse request body
     const { table, items, total, currency = 'EUR', testMode = true, comment, tip = 0 } = JSON.parse(event.body);
 
+    console.log('Payment request:', { table, itemCount: items?.length, total, testMode, tip });
+
     // Validate required fields
     if (!items || !total || items.length === 0) {
       return {
@@ -40,27 +42,63 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // Validate total amount
+    if (total <= 0 || isNaN(total)) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Invalid total amount', details: `Total must be a positive number, got: ${total}` })
+      };
+    }
+
+    // Get API key and validate
+    const apiKey = testMode ? process.env.MOLLIE_TEST_API_KEY : process.env.MOLLIE_LIVE_API_KEY;
+
+    if (!apiKey) {
+      console.error('Missing Mollie API key!', { testMode });
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          error: 'Payment configuration error',
+          details: `Missing ${testMode ? 'test' : 'live'} API key in environment variables`
+        })
+      };
+    }
+
     // Initialize Mollie client
-    const mollieClient = createMollieClient({
-      apiKey: testMode ? process.env.MOLLIE_TEST_API_KEY : process.env.MOLLIE_LIVE_API_KEY
-    });
+    const mollieClient = createMollieClient({ apiKey });
 
     // Create order description
     const orderDescription = `Station 134 - ${table !== 'Geen tafel' ? `Tafel ${table}` : 'Takeaway'}`;
     
-    // Create line items for Mollie
-    const lines = items.map(item => ({
-      name: item.displayName || item.name,
-      quantity: item.quantity,
-      unitPrice: {
-        currency: currency,
-        value: parseFloat(item.price.replace('€', '').replace(',', '.')).toFixed(2)
-      },
-      totalAmount: {
-        currency: currency,
-        value: (parseFloat(item.price.replace('€', '').replace(',', '.')) * item.quantity).toFixed(2)
+    // Create line items for Mollie with validation
+    const lines = items.map((item, index) => {
+      try {
+        const priceStr = item.price.replace('€', '').replace(',', '.');
+        const unitPrice = parseFloat(priceStr);
+
+        if (isNaN(unitPrice) || unitPrice < 0) {
+          throw new Error(`Invalid price for item "${item.name}": ${item.price}`);
+        }
+
+        return {
+          name: item.displayName || item.name,
+          quantity: item.quantity,
+          unitPrice: {
+            currency: currency,
+            value: unitPrice.toFixed(2)
+          },
+          totalAmount: {
+            currency: currency,
+            value: (unitPrice * item.quantity).toFixed(2)
+          }
+        };
+      } catch (err) {
+        console.error(`Error parsing item ${index}:`, item, err);
+        throw new Error(`Failed to parse item price: ${err.message}`);
       }
-    }));
+    });
 
     // Calculate total amount
     const totalAmount = {

@@ -956,6 +956,7 @@
         
         function toggleCustomTip() {
             const customInput = document.getElementById('custom-tip-input');
+            
             const customBtn = document.getElementById('tip-custom-btn');
             
             if (customInput.style.display === 'none') {
@@ -1107,20 +1108,24 @@
         
         async function placeOrder() {
             if (cart.length === 0) return;
-            
+
+            // Use proper decimal arithmetic to avoid floating point errors
             const subtotal = cart.reduce((sum, item) => {
                 const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.'));
                 return sum + (itemPrice * item.quantity);
             }, 0);
-            
-            const finalTotal = subtotal + currentTip;
+
+            // Round to 2 decimal places to fix floating point precision issues
+            const roundedSubtotal = Math.round(subtotal * 100) / 100;
+            const roundedTip = Math.round(currentTip * 100) / 100;
+            const finalTotal = Math.round((roundedSubtotal + roundedTip) * 100) / 100;
             const comment = document.getElementById('order-comment').value.trim();
             
             const orderData = {
                 table: currentTable || 'Geen tafel',
                 items: cart,
-                subtotal: subtotal,
-                tip: currentTip,
+                subtotal: roundedSubtotal,
+                tip: roundedTip,
                 total: finalTotal,
                 currency: 'EUR',
                 comment: comment
@@ -1173,7 +1178,11 @@
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.error || 'Failed to create payment');
+                    console.error('Payment creation failed:', errorData);
+                    const errorMessage = errorData.details
+                        ? `${errorData.error}: ${errorData.details}`
+                        : errorData.error || 'Failed to create payment';
+                    throw new Error(errorMessage);
                 }
 
                 const paymentData = await response.json();
