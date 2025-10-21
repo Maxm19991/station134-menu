@@ -109,19 +109,38 @@ exports.handler = async (event, context) => {
     // Get the site URL from headers
     const siteUrl = event.headers.origin || 'https://graceful-lebkuchen-da9a1f.netlify.app';
 
+    // Prepare metadata (Mollie has 1KB limit)
+    const metadata = {
+      table: table,
+      orderItems: JSON.stringify(items),
+      totalAmount: total.toFixed(2),
+      comment: (comment || '').substring(0, 200), // Limit comment to 200 chars
+      tip: tip.toFixed(2)
+    };
+
+    // Check metadata size (Mollie limit is 1024 bytes)
+    const metadataSize = JSON.stringify(metadata).length;
+    console.log('Metadata size:', metadataSize, 'bytes (limit: 1024)');
+
+    if (metadataSize > 1024) {
+      console.error('Metadata too large:', metadataSize, 'bytes');
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          error: 'Order too large',
+          details: `Order data (${metadataSize} bytes) exceeds payment provider limit (1024 bytes). Please reduce order size or comment length.`
+        })
+      };
+    }
+
     // Create payment with Mollie
     const payment = await mollieClient.payments.create({
       amount: totalAmount,
       description: orderDescription,
       redirectUrl: `${siteUrl}?payment=success`,
       webhookUrl: `https://graceful-lebkuchen-da9a1f.netlify.app/.netlify/functions/payment-webhook`,
-      metadata: {
-        table: table,
-        orderItems: JSON.stringify(items),
-        totalAmount: total.toFixed(2),
-        comment: comment || '',
-        tip: tip.toFixed(2)
-      }
+      metadata: metadata
     });
 
     // Return payment URL

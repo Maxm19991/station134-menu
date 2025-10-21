@@ -1141,9 +1141,24 @@
                 console.log('Starting payment process with data:', orderData);
                 console.log('Using functions URL:', NETLIFY_FUNCTIONS_URL);
                 console.log('Test mode:', USE_TEST_MODE);
-                
+
+                // Simplify items to reduce metadata size (Mollie has 1KB limit)
+                const simplifiedItems = cart.map(item => ({
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.quantity,
+                    options: item.options || ''
+                }));
+
+                const simplifiedOrderData = {
+                    ...orderData,
+                    items: simplifiedItems
+                };
+
+                console.log('Simplified order data size:', JSON.stringify(simplifiedItems).length, 'bytes');
+
                 // Create real Mollie payment
-                await createMolliePayment(orderData);
+                await createMolliePayment(simplifiedOrderData);
             } catch (error) {
                 console.error('Payment error:', error);
                 alert('Er is een probleem opgetreden met de betaling. Probeer het opnieuw.');
