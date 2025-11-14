@@ -1419,6 +1419,7 @@
             });
             
             // Create HTML for each category
+            console.log('[DEBUG] All category names found:', Object.keys(categories));
             const categoriesHTML = Object.keys(categories).map(categoryName => {
                 const categoryData = categories[categoryName];
                 const categoryId = categoryName.replace(/\s+/g, '-').replace(/'/g, '').toLowerCase();
