@@ -1444,21 +1444,26 @@
                         // Combine options with labels
                         let combinedOptions = '';
                         let combinedPrices = '';
-                        
+
+                        // Determine option labels based on category
+                        const isSnacksLos = categoryName === 'Snacks los';
+                        const option1Label = isSnacksLos ? 'saus snack' : 'saus frites';
+                        const option2Label = isSnacksLos ? 'Witte bol' : 'saus snack';
+
                         if (option1) {
-                            combinedOptions = `saus frites:${option1}`;
+                            combinedOptions = `${option1Label}:${option1}`;
                             combinedPrices = option1Prices;
                         }
-                        
+
                         if (option2) {
                             // If option2 has no prices but option1 does, use option1 prices for option2
                             const pricesForOption2 = option2Prices || option1Prices;
-                            
+
                             if (combinedOptions) {
-                                combinedOptions += `;saus snack:${option2}`;
+                                combinedOptions += `;${option2Label}:${option2}`;
                                 combinedPrices += `;${pricesForOption2}`;
                             } else {
-                                combinedOptions = `saus snack:${option2}`;
+                                combinedOptions = `${option2Label}:${option2}`;
                                 combinedPrices = pricesForOption2;
                             }
                         }
@@ -1521,8 +1526,13 @@
                         let combinedOptions = '';
                         let combinedPrices = '';
 
+                        // Determine option labels based on category
+                        const isSnacksLos = categoryName === 'Snacks los';
+                        const option1Label = isSnacksLos ? 'saus snack' : 'saus frites';
+                        const option2Label = isSnacksLos ? 'Witte bol' : 'saus snack';
+
                         if (option1) {
-                            combinedOptions = `saus frites:${option1}`;
+                            combinedOptions = `${option1Label}:${option1}`;
                             combinedPrices = option1Prices;
                         }
 
@@ -1531,10 +1541,10 @@
                             const pricesForOption2 = option2Prices || option1Prices;
 
                             if (combinedOptions) {
-                                combinedOptions += `;saus snack:${option2}`;
+                                combinedOptions += `;${option2Label}:${option2}`;
                                 combinedPrices += `;${pricesForOption2}`;
                             } else {
-                                combinedOptions = `saus snack:${option2}`;
+                                combinedOptions = `${option2Label}:${option2}`;
                                 combinedPrices = pricesForOption2;
                             }
                         }
