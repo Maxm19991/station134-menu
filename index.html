@@ -1647,6 +1647,10 @@
                             option1Label = 'saus';
                         } else if (isSundae) {
                             option1Label = 'Slagroom';
+                        } else if (isSoftijs) {
+                            option1Label = 'Dip';
+                        } else if (isMilkshakes) {
+                            option1Label = 'Formaat';
                         }
 
                         const isKapsalonOrKipsalon = name.toLowerCase().includes('kapsalon') || name.toLowerCase().includes('kipsalon');
@@ -1658,10 +1662,6 @@
                             option2Label = 'saus';
                         } else if (isKapsalonOrKipsalon) {
                             option2Label = 'saus vlees';
-                        } else if (isSoftijs) {
-                            option2Label = 'Dip';
-                        } else if (isMilkshakes) {
-                            option2Label = 'Formaat';
                         }
 
                         if (option1) {
