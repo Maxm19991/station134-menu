@@ -1430,14 +1430,15 @@
                         const option1Prices = item['Option Price'] || item['option price'] || item['Option price'] || item['OptionPrice'] || '';
                         const option2 = item['Option 2'] || item['option 2'] || item['Option2'] || item['Options 2'] || '';
 
-                        // Find option 2 price with more flexible matching
-                        let option2Prices = item['Option 2 Price'] || item['option 2 price'] || item['Option2Price'] || item['Option 2 price'] || '';
+                        // Find option 2 price - try exact match first, then variations
+                        let option2Prices = item['Option Price 2'] || item['Option 2 Price'] || item['option 2 price'] || item['Option2Price'] || item['option price 2'] || '';
 
-                        // If not found, search for any column that contains "Option 2" and "Price"
+                        // If not found, search for any column that contains "Option" and "Price" and "2"
                         if (!option2Prices) {
-                            const option2PriceKey = Object.keys(item).find(key =>
-                                key.toLowerCase().includes('option 2') && key.toLowerCase().includes('price')
-                            );
+                            const option2PriceKey = Object.keys(item).find(key => {
+                                const lower = key.toLowerCase();
+                                return lower.includes('option') && lower.includes('price') && lower.includes('2');
+                            });
                             if (option2PriceKey) {
                                 option2Prices = item[option2PriceKey];
                             }
@@ -1526,14 +1527,15 @@
                         const option1Prices = item['Option Price'] || item['option price'] || item['Option price'] || item['OptionPrice'] || '';
                         const option2 = item['Option 2'] || item['option 2'] || item['Option2'] || item['Options 2'] || '';
 
-                        // Find option 2 price with more flexible matching
-                        let option2Prices = item['Option 2 Price'] || item['option 2 price'] || item['Option2Price'] || item['Option 2 price'] || '';
+                        // Find option 2 price - try exact match first, then variations
+                        let option2Prices = item['Option Price 2'] || item['Option 2 Price'] || item['option 2 price'] || item['Option2Price'] || item['option price 2'] || '';
 
-                        // If not found, search for any column that contains "Option 2" and "Price"
+                        // If not found, search for any column that contains "Option" and "Price" and "2"
                         if (!option2Prices) {
-                            const option2PriceKey = Object.keys(item).find(key =>
-                                key.toLowerCase().includes('option 2') && key.toLowerCase().includes('price')
-                            );
+                            const option2PriceKey = Object.keys(item).find(key => {
+                                const lower = key.toLowerCase();
+                                return lower.includes('option') && lower.includes('price') && lower.includes('2');
+                            });
                             if (option2PriceKey) {
                                 option2Prices = item[option2PriceKey];
                             }
