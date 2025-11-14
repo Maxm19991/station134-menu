@@ -781,7 +781,7 @@
                     
                     if (hasTwoGroups) {
                         // Use dropdown for two option groups
-                        formHTML += `<select name="option-${groupIndex}" id="option-select-${groupIndex}" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-family: inherit; font-size: 14px; margin: 5px 0;">`;
+                        formHTML += `<select name="option-${groupIndex}" id="option-select-${groupIndex}" data-option-name="${optionName.trim()}" style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-family: inherit; font-size: 14px; margin: 5px 0;">`;
                         
                         choiceList.forEach((choice, choiceIndex) => {
                             const priceString = priceList[choiceIndex] ? priceList[choiceIndex].trim() : '0';
@@ -803,12 +803,12 @@
                             const priceString = priceList[choiceIndex] ? priceList[choiceIndex].trim() : '0';
                             const price = parseFloat(priceString) || 0;
                             const priceDisplay = price > 0 ? ` (+€${price.toFixed(2).replace('.', ',')})` : '';
-                            
+
                             console.log(`Choice: ${choice.trim()}, Price string: "${priceString}", Parsed price: ${price}`);
-                            
+
                             formHTML += `
                                 <label class="option-choice">
-                                    <input type="radio" name="option-${groupIndex}" value="${choice.trim()}" data-price="${price}" id="${inputId}" ${choiceIndex === 0 ? 'checked' : ''}>
+                                    <input type="radio" name="option-${groupIndex}" value="${choice.trim()}" data-price="${price}" data-option-name="${optionName.trim()}" id="${inputId}" ${choiceIndex === 0 ? 'checked' : ''}>
                                     ${choice.trim()}${priceDisplay}
                                 </label>
                             `;
@@ -841,22 +841,28 @@
             const form = document.getElementById('options-form');
             const selectedOptions = [];
             const selectedPrices = [];
-            
+
             // Handle radio buttons (for single option groups)
             const radioGroups = form.querySelectorAll('input[type="radio"]:checked');
             radioGroups.forEach(radio => {
-                selectedOptions.push(radio.value);
+                const optionName = radio.getAttribute('data-option-name') || '';
+                const value = radio.value;
+                const displayText = optionName ? `${optionName}: ${value}` : value;
+                selectedOptions.push(displayText);
                 selectedPrices.push(parseFloat(radio.getAttribute('data-price')) || 0);
             });
-            
+
             // Handle dropdowns (for two option groups)
             const dropdowns = form.querySelectorAll('select');
             dropdowns.forEach(select => {
                 const selectedOption = select.options[select.selectedIndex];
-                selectedOptions.push(selectedOption.value);
+                const optionName = select.getAttribute('data-option-name') || '';
+                const value = selectedOption.value;
+                const displayText = optionName ? `${optionName}: ${value}` : value;
+                selectedOptions.push(displayText);
                 selectedPrices.push(parseFloat(selectedOption.getAttribute('data-price')) || 0);
             });
-            
+
             const optionsText = selectedOptions.join(', ');
             const totalOptionPrice = selectedPrices.reduce((sum, price) => sum + price, 0);
             
