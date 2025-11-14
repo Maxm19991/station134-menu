@@ -784,8 +784,12 @@
                     } else if (isBroodjeSpecial) {
                         optionName = 'saus';
                     }
-                } else if (isSnacksLos && optionName.trim().toLowerCase() === 'saus snack') {
-                    optionName = 'saus snack';
+                } else if (optionName.trim().toLowerCase() === 'saus snack') {
+                    if (isSnacksLos) {
+                        optionName = 'saus snack';
+                    } else if (isUitsmijter) {
+                        optionName = 'saus';
+                    }
                 }
 
                 console.log('Option Name:', optionName);
@@ -1507,7 +1511,12 @@
                             option1Label = 'saus';
                         }
 
-                        const option2Label = isSnacksLos ? 'Witte bol' : 'saus snack';
+                        let option2Label = 'saus snack';
+                        if (isSnacksLos) {
+                            option2Label = 'Witte bol';
+                        } else if (isUitsmijter) {
+                            option2Label = 'saus';
+                        }
 
                         if (option1) {
                             combinedOptions = `${option1Label}:${option1}`;
@@ -1617,7 +1626,12 @@
                             option1Label = 'saus';
                         }
 
-                        const option2Label = isSnacksLos ? 'Witte bol' : 'saus snack';
+                        let option2Label = 'saus snack';
+                        if (isSnacksLos) {
+                            option2Label = 'Witte bol';
+                        } else if (isUitsmijter) {
+                            option2Label = 'saus';
+                        }
 
                         if (option1) {
                             combinedOptions = `${option1Label}:${option1}`;
