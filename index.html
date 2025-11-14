@@ -1469,7 +1469,8 @@
 
                         // Determine option labels based on category
                         const isSnacksLos = categoryName === 'Snacks los';
-                        const option1Label = isSnacksLos ? 'saus snack' : 'saus frites';
+                        const isUitsmijter = categoryName === 'Uitsmijter';
+                        const option1Label = isUitsmijter ? 'Kleur brood' : (isSnacksLos ? 'saus snack' : 'saus frites');
                         const option2Label = isSnacksLos ? 'Witte bol' : 'saus snack';
 
                         if (option1) {
@@ -1566,7 +1567,8 @@
 
                         // Determine option labels based on category
                         const isSnacksLos = categoryName === 'Snacks los';
-                        const option1Label = isSnacksLos ? 'saus snack' : 'saus frites';
+                        const isUitsmijter = categoryName === 'Uitsmijter';
+                        const option1Label = isUitsmijter ? 'Kleur brood' : (isSnacksLos ? 'saus snack' : 'saus frites');
                         const option2Label = isSnacksLos ? 'Witte bol' : 'saus snack';
 
                         if (option1) {
