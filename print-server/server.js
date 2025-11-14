@@ -101,20 +101,26 @@ async function printOrder(order) {
         printer.println('ITEMS:');
         printer.bold(false);
         printer.drawLine();
-        
+
         let totalAmount = 0;
-        
+
         order.items.forEach(item => {
             const itemPrice = parseFloat(item.price.replace('€', '').replace(',', '.'));
             const itemTotal = itemPrice * item.quantity;
             totalAmount += itemTotal;
-            
+
+            // Print category if available
+            if (item.category) {
+                printer.setTextSize(0, 0);
+                printer.println(`[${item.category}]`);
+            }
+
             printer.println(`${item.quantity}x ${item.name}`);
-            
+
             if (item.options) {
                 printer.println(`   Opties: ${item.options}`);
             }
-            
+
             printer.alignRight();
             printer.println(`€${itemTotal.toFixed(2).replace('.', ',')}`);
             printer.alignLeft();
@@ -223,23 +229,26 @@ async function printTestOrder() {
                 name: 'Hamburger Classic',
                 price: '€12,50',
                 quantity: 2,
-                options: 'Extra kaas, geen ui'
+                options: 'Extra kaas, geen ui',
+                category: 'Burgers'
             },
             {
                 name: 'Friet groot',
                 price: '€4,50',
                 quantity: 1,
-                options: null
+                options: null,
+                category: 'Snacks'
             },
             {
                 name: 'Cola',
                 price: '€2,75',
                 quantity: 2,
-                options: null
+                options: null,
+                category: 'Drinks'
             }
         ]
     };
-    
+
     console.log('Printing test order...');
     const success = await printOrder(testOrder);
     if (success) {

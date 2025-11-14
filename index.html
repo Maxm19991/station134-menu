@@ -657,18 +657,18 @@
             console.log('Cart cleared');
         }
         
-        function addToCart(name, price, options = '', optionPrices = '', buttonElement = null) {
+        function addToCart(name, price, options = '', optionPrices = '', buttonElement = null, category = '') {
             // Check if item has options and show options modal
             if (options && !currentItemForOptions) {
-                currentItemForOptions = { name, price, options, optionPrices };
+                currentItemForOptions = { name, price, options, optionPrices, category };
                 showOptionsModal(name, options, optionPrices);
                 return;
             }
-            
+
             // Create unique identifier for items with options
             const itemKey = options ? `${name} (${options})` : name;
             const existingItem = cart.find(item => item.key === itemKey);
-            
+
             if (existingItem) {
                 existingItem.quantity += 1;
             } else {
@@ -678,11 +678,12 @@
                     price: price,
                     quantity: 1,
                     options: options,
+                    category: category,
                     displayName: options ? `${name} (${options})` : name
                 });
             }
             saveCart();
-            
+
             // Visual feedback
             showAddToCartFeedback(buttonElement, name);
         }
@@ -860,18 +861,18 @@
             const totalOptionPrice = selectedPrices.reduce((sum, price) => sum + price, 0);
             
             // Get item details and clear modal state first
-            const { name, price } = currentItemForOptions;
+            const { name, price, category } = currentItemForOptions;
             closeOptionsModal(); // This clears currentItemForOptions
-            
+
             // Calculate total price (base price + option prices)
             const basePrice = parseFloat(price.replace('€', '').replace(',', '.'));
             const finalPrice = basePrice + totalOptionPrice;
             const finalPriceFormatted = `€${finalPrice.toFixed(2).replace('.', ',')}`;
-            
+
             // Add directly to cart without triggering options modal again
             const itemKey = `${name} (${optionsText})`;
             const existingItem = cart.find(item => item.key === itemKey);
-            
+
             if (existingItem) {
                 existingItem.quantity += 1;
             } else {
@@ -883,11 +884,12 @@
                     optionPrice: totalOptionPrice,
                     quantity: 1,
                     options: optionsText,
+                    category: category,
                     displayName: `${name} (${optionsText})`
                 });
             }
             saveCart();
-            
+
             // Visual feedback for options modal
             showAddToCartFeedback(null, name);
         }
@@ -1469,8 +1471,8 @@
                         return `
                             <div class="item">
                                 <div class="item-content">
-                                    ${imageUrl ? 
-                                        `<img src="${imageUrl}" alt="${name}" class="item-image" onerror="this.style.display='none'">` : 
+                                    ${imageUrl ?
+                                        `<img src="${imageUrl}" alt="${name}" class="item-image" onerror="this.style.display='none'">` :
                                         `<div class="item-image" style="background-color: #e9ecef; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6c757d;">No Image</div>`
                                     }
                                     <div class="item-text">
@@ -1479,13 +1481,13 @@
                                     </div>
                                 </div>
                                 <div class="item-actions">
-                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}', this)">Order Now</button>
+                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}', this, '${categoryName.replace(/'/g, "\\'")}')">Order Now</button>
                                     <div class="item-price">${price}</div>
                                 </div>
                             </div>
                         `;
                     }).join('');
-                    
+
                     categoryContentHTML += directItemsHTML;
                 }
                 
@@ -1504,7 +1506,7 @@
                         const option1Prices = item['Option Price'] || item['option price'] || item['Option price'] || item['OptionPrice'] || '';
                         const option2 = item['Option 2'] || item['option 2'] || item['Option2'] || item['Options 2'] || '';
                         const option2Prices = item['Option 2 Price'] || item['option 2 price'] || item['Option2Price'] || item['Option 2 price'] || '';
-                        
+
                         // Debug logging for the first few items
                         if (item['Item Name'] && (option1 || option2)) {
                             console.log('Item:', item['Item Name']);
@@ -1514,20 +1516,20 @@
                             console.log('Option2:', option2);
                             console.log('Option2Prices:', option2Prices);
                         }
-                        
+
                         // Combine options with labels
                         let combinedOptions = '';
                         let combinedPrices = '';
-                        
+
                         if (option1) {
                             combinedOptions = `saus frites:${option1}`;
                             combinedPrices = option1Prices;
                         }
-                        
+
                         if (option2) {
                             // If option2 has no prices but option1 does, use option1 prices for option2
                             const pricesForOption2 = option2Prices || option1Prices;
-                            
+
                             if (combinedOptions) {
                                 combinedOptions += `;saus snack:${option2}`;
                                 combinedPrices += `;${pricesForOption2}`;
@@ -1536,17 +1538,17 @@
                                 combinedPrices = pricesForOption2;
                             }
                         }
-                        
+
                         const options = combinedOptions;
                         const optionPrices = combinedPrices;
                         const rawImageUrl = item['Image'] || item['image'] || '';
                         const imageUrl = fixGoogleDriveUrl(rawImageUrl);
-                        
+
                         return `
                             <div class="item">
                                 <div class="item-content">
-                                    ${imageUrl ? 
-                                        `<img src="${imageUrl}" alt="${name}" class="item-image" onerror="this.style.display='none'">` : 
+                                    ${imageUrl ?
+                                        `<img src="${imageUrl}" alt="${name}" class="item-image" onerror="this.style.display='none'">` :
                                         `<div class="item-image" style="background-color: #e9ecef; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #6c757d;">No Image</div>`
                                     }
                                     <div class="item-text">
@@ -1555,7 +1557,7 @@
                                     </div>
                                 </div>
                                 <div class="item-actions">
-                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}', this)">Order Now</button>
+                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}', this, '${categoryName.replace(/'/g, "\\'")}')">Order Now</button>
                                     <div class="item-price">${price}</div>
                                 </div>
                             </div>
