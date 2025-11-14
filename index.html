@@ -1456,8 +1456,8 @@
                         }
 
                         if (option2) {
-                            // If option2 has no prices but option1 does, use option1 prices for option2
-                            const pricesForOption2 = option2Prices || option1Prices;
+                            // Use option2Prices from the Option 2 Price column
+                            const pricesForOption2 = option2Prices;
 
                             if (combinedOptions) {
                                 combinedOptions += `;${option2Label}:${option2}`;
@@ -1537,8 +1537,8 @@
                         }
 
                         if (option2) {
-                            // If option2 has no prices but option1 does, use option1 prices for option2
-                            const pricesForOption2 = option2Prices || option1Prices;
+                            // Use option2Prices from the Option 2 Price column
+                            const pricesForOption2 = option2Prices;
 
                             if (combinedOptions) {
                                 combinedOptions += `;${option2Label}:${option2}`;
