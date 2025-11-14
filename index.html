@@ -1444,13 +1444,16 @@
                         }
 
                         // Debug logging for the first few items
-                        if (item['Item Name'] && (option1 || option2)) {
+                        if (item['Item Name'] && option2) {
+                            console.log('=== OPTION 2 DEBUG ===');
                             console.log('Item:', item['Item Name']);
                             console.log('Available columns:', Object.keys(item));
-                            console.log('Option1:', option1);
-                            console.log('Option1Prices:', option1Prices);
+                            console.log('All column values:');
+                            Object.keys(item).forEach(key => {
+                                console.log(`  ${key}: ${item[key]}`);
+                            });
                             console.log('Option2:', option2);
-                            console.log('Option2Prices:', option2Prices);
+                            console.log('Option2Prices found:', option2Prices);
                         }
                         
                         // Combine options with labels
@@ -1537,13 +1540,16 @@
                         }
 
                         // Debug logging for the first few items
-                        if (item['Item Name'] && (option1 || option2)) {
+                        if (item['Item Name'] && option2) {
+                            console.log('=== OPTION 2 DEBUG ===');
                             console.log('Item:', item['Item Name']);
                             console.log('Available columns:', Object.keys(item));
-                            console.log('Option1:', option1);
-                            console.log('Option1Prices:', option1Prices);
+                            console.log('All column values:');
+                            Object.keys(item).forEach(key => {
+                                console.log(`  ${key}: ${item[key]}`);
+                            });
                             console.log('Option2:', option2);
-                            console.log('Option2Prices:', option2Prices);
+                            console.log('Option2Prices found:', option2Prices);
                         }
 
                         // Combine options with labels
