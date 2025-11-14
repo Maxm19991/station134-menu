@@ -774,8 +774,16 @@
                 // Apply category-specific label overrides
                 const isSnacksLos = category === 'Snacks los';
                 const isUitsmijter = category === 'Uitsmijter' || itemName.toLowerCase().includes('uitsmijter') || itemName.toLowerCase().includes('tosti');
-                if (isUitsmijter && optionName.trim().toLowerCase() === 'saus frites') {
-                    optionName = 'Kleur brood';
+                const isStokbrood = itemName.toLowerCase().includes('stokbrood');
+                const isBroodjeSpecial = itemName.toLowerCase().includes('broodje kroket') || itemName.toLowerCase().includes('broodje frikandel') || itemName.toLowerCase().includes('broodje gehaktbal');
+                const isLunchgerechten = category === 'Lunch' || category === 'Lunchgerechten';
+
+                if (optionName.trim().toLowerCase() === 'saus frites') {
+                    if (isUitsmijter || isStokbrood || (isLunchgerechten && !isBroodjeSpecial)) {
+                        optionName = 'Kleur brood';
+                    } else if (isBroodjeSpecial) {
+                        optionName = 'saus';
+                    }
                 } else if (isSnacksLos && optionName.trim().toLowerCase() === 'saus snack') {
                     optionName = 'saus snack';
                 }
@@ -1486,7 +1494,19 @@
                         // Determine option labels based on category and item name
                         const isSnacksLos = categoryName === 'Snacks los';
                         const isUitsmijter = name.toLowerCase().includes('uitsmijter') || name.toLowerCase().includes('tosti');
-                        const option1Label = isUitsmijter ? 'Kleur brood' : (isSnacksLos ? 'saus snack' : 'saus frites');
+                        const isStokbrood = name.toLowerCase().includes('stokbrood');
+                        const isBroodjeSpecial = name.toLowerCase().includes('broodje kroket') || name.toLowerCase().includes('broodje frikandel') || name.toLowerCase().includes('broodje gehaktbal');
+                        const isLunchgerechten = categoryName === 'Lunch' || categoryName === 'Lunchgerechten';
+
+                        let option1Label = 'saus frites';
+                        if (isSnacksLos) {
+                            option1Label = 'saus snack';
+                        } else if (isUitsmijter || isStokbrood || (isLunchgerechten && !isBroodjeSpecial)) {
+                            option1Label = 'Kleur brood';
+                        } else if (isBroodjeSpecial) {
+                            option1Label = 'saus';
+                        }
+
                         const option2Label = isSnacksLos ? 'Witte bol' : 'saus snack';
 
                         if (option1) {
@@ -1584,7 +1604,19 @@
                         // Determine option labels based on category and item name
                         const isSnacksLos = categoryName === 'Snacks los';
                         const isUitsmijter = name.toLowerCase().includes('uitsmijter') || name.toLowerCase().includes('tosti');
-                        const option1Label = isUitsmijter ? 'Kleur brood' : (isSnacksLos ? 'saus snack' : 'saus frites');
+                        const isStokbrood = name.toLowerCase().includes('stokbrood');
+                        const isBroodjeSpecial = name.toLowerCase().includes('broodje kroket') || name.toLowerCase().includes('broodje frikandel') || name.toLowerCase().includes('broodje gehaktbal');
+                        const isLunchgerechten = categoryName === 'Lunch' || categoryName === 'Lunchgerechten';
+
+                        let option1Label = 'saus frites';
+                        if (isSnacksLos) {
+                            option1Label = 'saus snack';
+                        } else if (isUitsmijter || isStokbrood || (isLunchgerechten && !isBroodjeSpecial)) {
+                            option1Label = 'Kleur brood';
+                        } else if (isBroodjeSpecial) {
+                            option1Label = 'saus';
+                        }
+
                         const option2Label = isSnacksLos ? 'Witte bol' : 'saus snack';
 
                         if (option1) {
