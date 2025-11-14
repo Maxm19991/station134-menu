@@ -657,11 +657,11 @@
             console.log('Cart cleared');
         }
         
-        function addToCart(name, price, options = '', optionPrices = '', buttonElement = null, category = '') {
+        function addToCart(name, price, options = '', optionPrices = '', buttonElement = null, category = '', subcategory = '') {
             // Check if item has options and show options modal
             if (options && !currentItemForOptions) {
-                currentItemForOptions = { name, price, options, optionPrices, category };
-                showOptionsModal(name, options, optionPrices, category);
+                currentItemForOptions = { name, price, options, optionPrices, category, subcategory };
+                showOptionsModal(name, options, optionPrices, category, subcategory);
                 return;
             }
 
@@ -720,7 +720,7 @@
             }
         }
         
-        function showOptionsModal(itemName, optionsString, optionPricesString = '', category = '') {
+        function showOptionsModal(itemName, optionsString, optionPricesString = '', category = '', subcategory = '') {
             const modal = document.getElementById('options-modal');
             const title = document.getElementById('options-title');
             const form = document.getElementById('options-form');
@@ -778,12 +778,18 @@
                 const isBroodjeSpecial = itemName.toLowerCase().includes('broodje kroket') || itemName.toLowerCase().includes('broodje frikandel') || itemName.toLowerCase().includes('broodje gehaktbal');
                 const isLunchgerechten = category === 'Lunch' || category === 'Lunchgerechten';
                 const isKapsalonOrKipsalon = itemName.toLowerCase().includes('kapsalon') || itemName.toLowerCase().includes('kipsalon');
+                const isIjsAndShakes = category === 'Ijs & Shakes';
+                const isSundae = subcategory.toLowerCase().includes('sundae');
+                const isSoftijs = subcategory.toLowerCase().includes('softijs');
+                const isMilkshakes = subcategory.toLowerCase().includes('milkshake');
 
                 if (optionName.trim().toLowerCase() === 'saus frites') {
                     if (isUitsmijter || isStokbrood || (isLunchgerechten && !isBroodjeSpecial)) {
                         optionName = 'Kleur brood';
                     } else if (isBroodjeSpecial) {
                         optionName = 'saus';
+                    } else if (isSundae) {
+                        optionName = 'Slagroom';
                     }
                 } else if (optionName.trim().toLowerCase() === 'saus snack') {
                     if (isSnacksLos) {
@@ -792,6 +798,10 @@
                         optionName = 'saus';
                     } else if (isKapsalonOrKipsalon) {
                         optionName = 'saus vlees';
+                    } else if (isSoftijs) {
+                        optionName = 'Dip';
+                    } else if (isMilkshakes) {
+                        optionName = 'Formaat';
                     }
                 }
 
@@ -1561,7 +1571,7 @@
                                     </div>
                                 </div>
                                 <div class="item-actions">
-                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}', this, '${categoryName.replace(/'/g, "\\'")}')">Order Now</button>
+                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}', this, '${categoryName.replace(/'/g, "\\'")}', '')">Order Now</button>
                                     <div class="item-price">${price}</div>
                                 </div>
                             </div>
@@ -1617,12 +1627,16 @@
                         let combinedOptions = '';
                         let combinedPrices = '';
 
-                        // Determine option labels based on category and item name
+                        // Determine option labels based on category, subcategory and item name
                         const isSnacksLos = categoryName === 'Snacks los';
                         const isUitsmijter = name.toLowerCase().includes('uitsmijter') || name.toLowerCase().includes('tosti');
                         const isStokbrood = name.toLowerCase().includes('stokbrood');
                         const isBroodjeSpecial = name.toLowerCase().includes('broodje kroket') || name.toLowerCase().includes('broodje frikandel') || name.toLowerCase().includes('broodje gehaktbal');
                         const isLunchgerechten = categoryName === 'Lunch' || categoryName === 'Lunchgerechten';
+                        const isIjsAndShakes = categoryName === 'Ijs & Shakes';
+                        const isSundae = subcategoryName.toLowerCase().includes('sundae');
+                        const isSoftijs = subcategoryName.toLowerCase().includes('softijs');
+                        const isMilkshakes = subcategoryName.toLowerCase().includes('milkshake');
 
                         let option1Label = 'saus frites';
                         if (isSnacksLos) {
@@ -1631,6 +1645,8 @@
                             option1Label = 'Kleur brood';
                         } else if (isBroodjeSpecial) {
                             option1Label = 'saus';
+                        } else if (isSundae) {
+                            option1Label = 'Slagroom';
                         }
 
                         const isKapsalonOrKipsalon = name.toLowerCase().includes('kapsalon') || name.toLowerCase().includes('kipsalon');
@@ -1642,6 +1658,10 @@
                             option2Label = 'saus';
                         } else if (isKapsalonOrKipsalon) {
                             option2Label = 'saus vlees';
+                        } else if (isSoftijs) {
+                            option2Label = 'Dip';
+                        } else if (isMilkshakes) {
+                            option2Label = 'Formaat';
                         }
 
                         if (option1) {
@@ -1680,13 +1700,13 @@
                                     </div>
                                 </div>
                                 <div class="item-actions">
-                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}', this, '${categoryName.replace(/'/g, "\\'")}')">Order Now</button>
+                                    <button class="btn order-btn" onclick="addToCart('${name.replace(/'/g, "\\'")}', '${price}', '${options.replace(/'/g, "\\'")}', '${optionPrices}', this, '${categoryName.replace(/'/g, "\\'")}', '${subcategoryName.replace(/'/g, "\\'")}')">Order Now</button>
                                     <div class="item-price">${price}</div>
                                 </div>
                             </div>
                         `;
                     }).join('');
-                    
+
                     categoryContentHTML += `
                         <div class="subcategory-section">
                             <button class="subcategory-header" onclick="toggleSubcategory('${categoryId}', '${subcategoryId.replace(/'/g, "\\'")}')">
