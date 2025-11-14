@@ -749,21 +749,28 @@
             
             optionGroups.forEach((group, groupIndex) => {
                 console.log('Processing group:', group);
-                
+
                 // Split on first colon to get main category
                 const firstColonIndex = group.indexOf(':');
                 if (firstColonIndex === -1) return;
-                
+
                 const optionName = group.substring(0, firstColonIndex);
                 const remaining = group.substring(firstColonIndex + 1);
-                
+
                 // Split the remaining part on second colon to get choices
                 const secondColonIndex = remaining.indexOf(':');
-                if (secondColonIndex === -1) return;
-                
-                const subcategoryName = remaining.substring(0, secondColonIndex);
-                const choicesString = remaining.substring(secondColonIndex + 1);
-                
+                let subcategoryName = '';
+                let choicesString = '';
+
+                if (secondColonIndex === -1) {
+                    // Format: optionName:choices (no subcategory)
+                    choicesString = remaining;
+                } else {
+                    // Format: optionName:subcategoryName:choices
+                    subcategoryName = remaining.substring(0, secondColonIndex);
+                    choicesString = remaining.substring(secondColonIndex + 1);
+                }
+
                 console.log('Option Name:', optionName);
                 console.log('Subcategory:', subcategoryName);
                 console.log('Choices String:', choicesString);
