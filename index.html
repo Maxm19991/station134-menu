@@ -777,6 +777,7 @@
                 const isStokbrood = itemName.toLowerCase().includes('stokbrood');
                 const isBroodjeSpecial = itemName.toLowerCase().includes('broodje kroket') || itemName.toLowerCase().includes('broodje frikandel') || itemName.toLowerCase().includes('broodje gehaktbal');
                 const isLunchgerechten = category === 'Lunch' || category === 'Lunchgerechten';
+                const isKapsalonOrKipsalon = itemName.toLowerCase().includes('kapsalon') || itemName.toLowerCase().includes('kipsalon');
 
                 if (optionName.trim().toLowerCase() === 'saus frites') {
                     if (isUitsmijter || isStokbrood || (isLunchgerechten && !isBroodjeSpecial)) {
@@ -789,6 +790,8 @@
                         optionName = 'saus snack';
                     } else if (isUitsmijter) {
                         optionName = 'saus';
+                    } else if (isKapsalonOrKipsalon) {
+                        optionName = 'saus vlees';
                     }
                 }
 
@@ -1511,11 +1514,15 @@
                             option1Label = 'saus';
                         }
 
+                        const isKapsalonOrKipsalon = name.toLowerCase().includes('kapsalon') || name.toLowerCase().includes('kipsalon');
+
                         let option2Label = 'saus snack';
                         if (isSnacksLos) {
                             option2Label = 'Witte bol';
                         } else if (isUitsmijter) {
                             option2Label = 'saus';
+                        } else if (isKapsalonOrKipsalon) {
+                            option2Label = 'saus vlees';
                         }
 
                         if (option1) {
@@ -1626,11 +1633,15 @@
                             option1Label = 'saus';
                         }
 
+                        const isKapsalonOrKipsalon = name.toLowerCase().includes('kapsalon') || name.toLowerCase().includes('kipsalon');
+
                         let option2Label = 'saus snack';
                         if (isSnacksLos) {
                             option2Label = 'Witte bol';
                         } else if (isUitsmijter) {
                             option2Label = 'saus';
+                        } else if (isKapsalonOrKipsalon) {
+                            option2Label = 'saus vlees';
                         }
 
                         if (option1) {
